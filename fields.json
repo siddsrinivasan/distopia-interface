@@ -1,0 +1,9 @@
+[
+  "OBJECTID",
+  "DNR_REGION",
+  "DNR_CNTY_C",
+  "COUNTY_NAM",
+  "COUNTY_FIP",
+  "SHAPEAREA",
+  "SHAPELEN"
+]
