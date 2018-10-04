@@ -1,0 +1,62 @@
+<html>
+	<head>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.7.0/d3.js"></script>
+	</head>
+	<body>
+		<svg></svg>
+		<script>
+			var svg = d3.select("svg");
+			var polygonData = [];
+			d3.json("polygons.json").then(function(data){
+				data.forEach(function(element){
+					element.forEach(function(d){
+						polygonData.push(d);
+					});
+				});
+				var minX = d3.min(polygonData, function(countyPoints){
+					return d3.min(countyPoints, function(singlePoint){
+						return singlePoint[0];
+					});
+				});
+				var minY = d3.min(polygonData, function(countyPoints){
+					return d3.min(countyPoints, function(singlePoint){
+						return singlePoint[1];
+					});
+				});
+				var maxX = d3.max(polygonData, function(countyPoints){
+					return d3.max(countyPoints, function(singlePoint){
+						return singlePoint[0];
+					});
+				});
+				var maxY = d3.max(polygonData, function(countyPoints){
+					return d3.max(countyPoints, function(singlePoint){
+						return singlePoint[1];
+					});
+				});
+				var x = [minX, maxX], y = [minY, maxY];
+				console.log(x);
+				console.log(y);
+				renderCounties(polygonData, x, y, 0.625);
+			});
+			function renderCounties(polygons, xRange, yRange, scaling){
+				svg.attr("width", Math.ceil(scaling * (xRange[1]-xRange[0])))
+					.attr("height", Math.ceil(scaling * (yRange[1]-yRange[0])));
+				var xScale = d3.scaleLinear().domain(xRange).range([0, Math.ceil(scaling * (xRange[1]-xRange[0]))]);
+				var yScale = d3.scaleLinear().domain(yRange).range([Math.ceil(scaling * (yRange[1]-yRange[0])), 0]);
+				polygons.forEach(function(county){
+					//console.log(county);
+					var ptString = ""
+					county.forEach(function(d){
+						//console.log([xScale(d[0]),yScale(d[1])].join(","));
+						ptString += " " + [xScale(d[0]),yScale(d[1])].join(",");
+					})
+					svg.append("polygon")
+						.attr("points", ptString)
+						.attr("fill", "none")
+						.attr("stroke", "black")
+						.attr("stroke-width", "0.25");
+				});
+			}
+		</script>
+	</body>
+</html>
