@@ -76,60 +76,77 @@
 				},
 			};
 			
-			var countyData
-
+			var countyData = [];
+			d3.json("records.json").then(function(data){
+				data.forEach(function(county){
+					countyData.push({
+						id: county[0],
+						name: county[3],
+						boundaries: null
+					});
+				});
+				console.log(data);
+			});
+			var poly;
 			var polygonData = [];
 			d3.json("polygons.json").then(function(data){
-				data.forEach(function(element){
-					element.forEach(function(d){
-						if(d.length > 10){
-							polygonData.push(d);
-						}
+				console.log(data);
+				for(var i = 0; i < data.length; i++){
+					//var bound = [];
+					//data[i].forEach(function(shape){
+					//	if(shape.length > 10){ bound.push(shape); }
+					//});
+					countyData[i].boundaries = data[i][0];
+				}
+				var minX = d3.min(data, function(countyShapes){
+					return d3.min(countyShapes, function(countyPoints){
+						return d3.min(countyPoints, function(singlePoint){
+							return singlePoint[0];
+						});
 					});
 				});
-				var minX = d3.min(polygonData, function(countyPoints){
-					return d3.min(countyPoints, function(singlePoint){
-						return singlePoint[0];
+				var minY = d3.min(data, function(countyShapes){
+					return d3.min(countyShapes, function(countyPoints){
+						return d3.min(countyPoints, function(singlePoint){
+							return singlePoint[1];
+						});
 					});
 				});
-				var minY = d3.min(polygonData, function(countyPoints){
-					return d3.min(countyPoints, function(singlePoint){
-						return singlePoint[1];
+				var maxX = d3.max(data, function(countyShapes){
+					return d3.max(countyShapes, function(countyPoints){
+						return d3.max(countyPoints, function(singlePoint){
+							return singlePoint[0];
+						});
 					});
 				});
-				var maxX = d3.max(polygonData, function(countyPoints){
-					return d3.max(countyPoints, function(singlePoint){
-						return singlePoint[0];
-					});
-				});
-				var maxY = d3.max(polygonData, function(countyPoints){
-					return d3.max(countyPoints, function(singlePoint){
-						return singlePoint[1];
+				var maxY = d3.max(data, function(countyShapes){
+					return d3.max(countyShapes, function(countyPoints){
+						return d3.max(countyPoints, function(singlePoint){
+							return singlePoint[1];
+						});
 					});
 				});
 				var x = [minX, maxX], y = [minY, maxY];
 				console.log(x);
 				console.log(y);
-				renderCounties(polygonData, x, y, 0.625);
+				renderCounties(countyData, x, y, 0.625);
 			});
-			function renderCounties(polygons, xRange, yRange, scaling){
+			function renderCounties(counties, xRange, yRange, scaling){
 				svg.attr("width", Math.ceil(scaling * (xRange[1]-xRange[0])))
 					.attr("height", Math.ceil(scaling * (yRange[1]-yRange[0])));
 				var xScale = d3.scaleLinear().domain(xRange).range([0, Math.ceil(scaling * (xRange[1]-xRange[0]))]);
 				var yScale = d3.scaleLinear().domain(yRange).range([Math.ceil(scaling * (yRange[1]-yRange[0])), 0]);
-				polygons.forEach(function(county){
-					//console.log(county);
-					var ptString = ""
-					county.forEach(function(d){
-						//console.log([xScale(d[0]),yScale(d[1])].join(","));
-						ptString += " " + [xScale(d[0]),yScale(d[1])].join(",");
+				console.log()
+				poly = svg.append("polyon")
+					.data(counties).enter()
+					.attr("points",function(d) {
+						return d.boundaries.map(function(d) {
+							console.log([xScale(d[0]),yScale(d[1])]);
+							return [xScale(d[0]),yScale(d[1])].join(",");
+						}).join(" ");
 					})
-					svg.append("polygon")
-						.attr("points", ptString)
-						.attr("fill", "none")
-						.attr("stroke", "black")
-						.attr("stroke-width", "0.25");
-				});
+					.attr("stroke","black")
+    				.attr("stroke-width",2);
 			}
 		</script>
 	</body>
