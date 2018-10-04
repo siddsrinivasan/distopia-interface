@@ -1,12 +1,20 @@
 <html>
 	<head>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.7.0/d3.js"></script>
+		<style>
+			polygon{
+				stroke-width:0.5px;
+				stroke:black;
+				fill: none;
+			}
+			
+		</style>
 	</head>
 	<body>
 		<svg></svg>
 		<script>
 			var svg = d3.select("svg");
-			
+			var countieBounds;
 			var districts = {
 				1: {
 					number: 1,
@@ -85,17 +93,11 @@
 						boundaries: null
 					});
 				});
-				console.log(data);
 			});
 			var poly;
 			var polygonData = [];
 			d3.json("polygons.json").then(function(data){
-				console.log(data);
 				for(var i = 0; i < data.length; i++){
-					//var bound = [];
-					//data[i].forEach(function(shape){
-					//	if(shape.length > 10){ bound.push(shape); }
-					//});
 					countyData[i].boundaries = data[i][0];
 				}
 				var minX = d3.min(data, function(countyShapes){
@@ -129,24 +131,21 @@
 				var x = [minX, maxX], y = [minY, maxY];
 				console.log(x);
 				console.log(y);
-				renderCounties(countyData, x, y, 0.625);
+				renderCounties(countyData, x, y, 1);
 			});
 			function renderCounties(counties, xRange, yRange, scaling){
 				svg.attr("width", Math.ceil(scaling * (xRange[1]-xRange[0])))
 					.attr("height", Math.ceil(scaling * (yRange[1]-yRange[0])));
 				var xScale = d3.scaleLinear().domain(xRange).range([0, Math.ceil(scaling * (xRange[1]-xRange[0]))]);
 				var yScale = d3.scaleLinear().domain(yRange).range([Math.ceil(scaling * (yRange[1]-yRange[0])), 0]);
-				console.log()
-				poly = svg.append("polyon")
-					.data(counties).enter()
-					.attr("points",function(d) {
-						return d.boundaries.map(function(d) {
-							console.log([xScale(d[0]),yScale(d[1])]);
-							return [xScale(d[0]),yScale(d[1])].join(",");
+				countieBounds = svg.selectAll("polygon")
+					.data(counties).enter().append("polygon")
+					.attr("class", function(county){ return county.name; })
+					.attr("points", function(county){
+						return county.boundaries.map(function(point){
+							return [xScale(point[0]), yScale(point[1])].join(",");
 						}).join(" ");
-					})
-					.attr("stroke","black")
-    				.attr("stroke-width",2);
+					});
 			}
 		</script>
 	</body>
