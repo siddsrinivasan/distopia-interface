@@ -2,75 +2,35 @@ var svg = d3.select("#state");
 var w = parseFloat(svg.style("width"));
 var h = parseFloat(svg.style("height"));
 
-var countieBounds;
-var districts = {
-	1: {
-		number: 1,
-		counties: [],
-		race: {
-			asian: 10,
-			african_american: 10,
-			white: 10,
-			native_american: 10,
-			native_islander: 10,
-			other: 10,
-			multiple: 10
-		},
-		age: {
-			"18to24": 10,
-			"25to44": 10,
-			"45to65": 10,
-			"65plus": 10
-		},
-		income:{
-			level1: 10,
-			level2: 10,
-			level3: 10,
-			level4: 10
-		},
-		education_level:{
+var countyBounds;
 
-		},
-		partisan_lean:{
-			democrat: 10,
-			republican: 10,
-			independent: 10
-		}
-	},
-	2: {
-		number: 2,
-		counties: [],
-		race: {
-			asian: 10,
-			african_american: 10,
-			white: 10,
-			native_american: 10,
-			native_islander: 10,
-			other: 10,
-			multiple: 10
-		},
-		age: {
-			"18to24": 10,
-			"25to44": 10,
-			"45to65": 10,
-			"65plus": 10
-		},
-		income:{
-			level1: 10,
-			level2: 10,
-			level3: 10,
-			level4: 10
-		},
-		education_level:{
+var age = [
+	{age_range: "18 to 24",
+	amount: 15},
+	{age_range: "25 to 44",
+	amount: 27},
+	{age_range: "45 to 65",
+	amount: 30},
+	{age_range: "65 plus",
+	amount: 19}
+];
 
-		},
-		partisan_lean:{
-			democrat: 10,
-			republican: 10,
-			independent: 10
-		}
-	},
-};
+var race = [
+	{race: "Asian", amount: 5},
+	{race: "African American", amount: 15},
+	{race: "White", amount: 65},
+	{race: "Native American", amount: 12},
+	{race: "Native Islander", amount: 1},
+	{race: "Other", amount: 1},
+	{race: "Multiple", amount: 2},
+];
+
+var income = [
+	{income_group: "level1", amount: 15},
+	{income_group: "level2", amount: 37},
+	{income_group: "level3", amount: 27},
+	{income_group: "level4", amount: 21},
+]
 
 var countyData = [];
 d3.json("records.json").then(function(data){
@@ -85,6 +45,19 @@ d3.json("records.json").then(function(data){
 var poly;
 var polygonData = [];
 var district = [];
+
+function renderRace(){
+	var raceCanvas = d3.select("#population");
+	
+}
+
+function renderAge(){
+	var raceCanvas = d3.select("#demographics");
+}
+
+function renderAge(){
+	var educationCanvas = d3.select("#education");
+}
 
 d3.json("polygons.json").then(function(data){
 	for(var i = 0; i < data.length; i++){
@@ -121,23 +94,14 @@ d3.json("polygons.json").then(function(data){
 	renderCounties(district, x, y);
 });
 
-function getDistData(){
-	countyData.forEach(function(county){
-
-	});
-	
-	console.log(x);	console.log(y);
-}
-
 function renderCounties(counties, xRange, yRange){
-
 	var scaling = h/((yRange[1]-yRange[0]));
 	var scaledWith = Math.ceil(scaling * (xRange[1]-xRange[0]));
 	var padding = (w - scaledWith)/2;
 	console.log(scaling);
 	var xScale = d3.scaleLinear().domain(xRange).range([padding, Math.ceil(scaling * (xRange[1]-xRange[0]))+padding]);
 	var yScale = d3.scaleLinear().domain(yRange).range([Math.ceil(scaling * (yRange[1]-yRange[0])), 0]);
-	countieBounds = svg.selectAll("polygon")
+	countyBounds = svg.selectAll("polygon")
 		.data(counties).enter().append("polygon")
 		.attr("class", function(county){ return county.name; })
 		.attr("points", function(county){

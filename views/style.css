@@ -117,6 +117,13 @@
   margin-left: 3.5em;
 }
 
+.subtitle{
+  margin-left: 0.5em;
+}
+#lean{
+  color: #4A90E2;
+}
+
 .button {
       display: inline-block;
       position: relative;
@@ -148,7 +155,7 @@
   transition-delay: 0s;
 }
 polygon{
-  stroke-width:1px;
+  stroke-width:2px;
   stroke:white;
   fill: #4A90E2;
 }
