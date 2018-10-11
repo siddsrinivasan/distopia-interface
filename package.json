@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/hrc2da/distopia-interface/issues"
   },
-  "homepage": "https://github.com/hrc2da/distopia-interface#readme"
+  "homepage": "https://github.com/hrc2da/distopia-interface#readme",
+  "dependencies": {
+    "express": "^4.16.3"
+  }
 }

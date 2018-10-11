@@ -2,6 +2,32 @@ var svg = d3.select("#state");
 var w = parseFloat(svg.style("width"));
 var h = parseFloat(svg.style("height"));
 
+var ros = new ROSLIB.Ros({
+	url: 'ws://localhost:9090'
+});
+
+ros.on('connection', function(){
+	console.log("Connected to ROS bridge");
+});
+
+ros.on('error', function(error){
+	console.log('Error connecting to websocket server: ', error);
+});
+
+ros.on('close', function() {
+	console.log('Connection to websocket server closed.');
+});
+
+var listener = new ROSLIB.Topic({
+	ros: ros,
+	name: '/district',
+	messageType : 'std_msgs/String'
+});
+
+listener.subscribe(function(message){
+	
+});
+
 var countyBounds;
 
 var age = [
@@ -26,8 +52,7 @@ var income = [
 	{income_group: "level2", amount: 37},
 	{income_group: "level3", amount: 27},
 	{income_group: "level4", amount: 12},
-	{income_group: "level4", amount: 10},
-
+	{income_group: "level4", amount: 10}
 ]
 
 var countyData = [];
