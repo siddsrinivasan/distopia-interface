@@ -18,14 +18,24 @@ ros.on('close', function() {
 	console.log('Connection to websocket server closed.');
 });
 
-var listener = new ROSLIB.Topic({
+var district_listener = new ROSLIB.Topic({
 	ros: ros,
-	name: '/district',
+	name: '/evaluated_designs',
 	messageType : 'std_msgs/String'
 });
 
-listener.subscribe(function(message){
-	
+var event_listener = new ROSLIB.Topic({
+	ros: ros,
+	name: '/tuio_control',
+	messageType : 'std_msgs/String'
+});
+
+district_listener.subscribe(function(message){
+	console.log(message.data);	
+});
+
+event_listener.subscribe(function(message){
+	console.log(message.data);
 });
 
 var countyBounds;
