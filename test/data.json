@@ -1,0 +1,35 @@
+[
+    {
+        "district_id": 0,
+        "precincts": [10, 11, 15, 12],
+        "metrics": [
+            {
+                "name": "race",
+                "labels": ["black", "white", "hispanic", "asian", "native"],
+                "data": [1200, 15283, 123, 7, 2001]
+            },
+            {
+                "name": "partisan lean",
+                "labels": ["republican", "democrat", "independent"],
+                "data": [9306, 9306, 2]
+            }
+        ]
+    },
+    {
+        "district_id": 1,
+        "precincts": [9, 4, 3, 8],
+        "metrics": [
+            {
+                "name": "race",
+                "labels": ["black", "white", "hispanic", "asian", "native"],
+                "data": [15283, 2001, 15283, 1200, 7]
+            },
+            {
+                "name": "partisan lean",
+                "labels": ["republican", "democrat", "independent"],
+                "data": [9306, 2, 9306]
+            }
+        ]
+    }
+]
+
