@@ -2,6 +2,8 @@ var svg = d3.select("#state");
 var w = parseFloat(svg.style("width"));
 var h = parseFloat(svg.style("height"));
 
+var counter;
+
 var ros = new ROSLIB.Ros({
 	url: 'ws://localhost:9090'
 });
@@ -31,12 +33,67 @@ var event_listener = new ROSLIB.Topic({
 });
 
 district_listener.subscribe(function(message){
-	console.log(message.data);	
+	var jsonMess = JSON.parse(message.data);
+	if(counter == null){
+		counter = jsonMess.counter;
+	}
+	else{
+		if(counter < jsonMess.counter){
+			return;
+		}
+	}
+	console.log(jsonMess);
+	console.log(jsonMess[0]);
 });
 
 event_listener.subscribe(function(message){
 	console.log(message.data);
 });
+
+
+var district_publisher = new ROSLIB.Topic({
+	ros: ros,
+	name: '/evaluated_designs',
+	messageType : 'std_msgs/String'
+});
+
+var arr = new ROSLIB.Message ({
+	data: JSON.stringify([
+    {
+        "district_id": 0,
+        "precincts": [10, 11, 15, 12],
+        "metrics": [
+            {
+                "name": "race",
+                "labels": ["black", "white", "hispanic", "asian", "native"],
+                "data": [1200, 15283, 123, 7, 2001]
+            },
+            {
+                "name": "partisan lean",
+                "labels": ["republican", "democrat", "independent"],
+                "data": [9306, 9306, 2]
+            }
+        ]
+    },
+    {
+        "district_id": 1,
+        "precincts": [9, 4, 3, 8],
+        "metrics": [
+            {
+                "name": "race",
+                "labels": ["black", "white", "hispanic", "asian", "native"],
+                "data": [15283, 2001, 15283, 1200, 7]
+            },
+            {
+                "name": "partisan lean",
+                "labels": ["republican", "democrat", "independent"],
+                "data": [9306, 2, 9306]
+            }
+        ]
+    }
+])});
+
+district_publisher.publish(arr);
 
 var countyBounds;
 
@@ -117,18 +174,12 @@ function renderAge(){
 	var yPadding = 0.1 * thisHeight;
 	var graphWidth = 0.5 * thisWidth;
 	var xPadding = 0.25 * thisWidth;
-	console.log(graphWidth);
 	var yScale = d3.scaleLinear().domain([0, 50]).range([graphHeight + yPadding, yPadding])
 
 	age.forEach(function(era, index){
 		var color;
-		if(index % 2 == 0){
-			color = "#8A82E5";
-		}
-		else{
-			console.log("odd");
-			color = "#A49AC9";
-		}
+		if(index % 2 == 0){ color = "#8A82E5"; }
+		else{ color = "#A49AC9"; }
 		ageCanvas.append("rect").attr("width", 75).attr("height", yScale(era.amount))
 			.attr("x", index * 125 + xPadding + 25).attr("y", graphHeight - yScale(era.amount) + yPadding)
 			.attr("fill", color);
@@ -144,18 +195,12 @@ function renderEdu(){
 	var yPadding = 0.1 * thisHeight;
 	var graphWidth = 0.5 * thisWidth;
 	var xPadding = 0.25 * thisWidth;
-	console.log(graphWidth);
 	var yScale = d3.scaleLinear().domain([0, 50]).range([graphHeight + yPadding, yPadding])
 
 	income.forEach(function(group, index){
 		var color;
-		if(index % 2 == 0){
-			color = "#8A82E5";
-		}
-		else{
-			console.log("odd");
-			color = "#A49AC9";
-		}
+		if(index % 2 == 0){ color = "#8A82E5"; }
+		else{ color = "#A49AC9"; }
 		educationCanvas.append("rect").attr("width", 75).attr("height", yScale(group.amount))
 			.attr("x", index * 100 + xPadding + 25).attr("y", graphHeight - yScale(group.amount) + yPadding)
 			.attr("fill", color);
