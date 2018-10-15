@@ -119,12 +119,13 @@ var polygonData = [];
 var district = [];
 
 function updateDistrictView(districtID){
-		
+	
 }
 
 function updateStateView(metric){
 	var districtBounds = [];
 	var metricData = [];
+	
 	district_data.forEach(function(district){
 		districtBounds.push(district.boundaries);
 		district.metrics.forEach(function(m){
@@ -134,13 +135,21 @@ function updateStateView(metric){
 
 	//update states graphic
 	var state = d3.select("#state");
+
+	var xScale = d3.scaleLinear().domain([minX, maxX]).range([0, stateW]);
+	var yScale = d3.scaleLinear().domain([minY, maxY]).range([stateH, 0]);
+	
+	state.selectAll("polygon").data(districtBounds);
+	
+	state.exit().remove();
 	state.selectAll("polygon")
 		.data(counties).enter().append("polygon")
-		.attr("class", function(county){ return county.name; })
-		.attr("points", function(county){
-			return county.boundaries.map(function(point){
-				return [xScale(point[0]), yScale(point[1])].join(",");
-			}).join(" ");
+		.attr("points", function(counties){
+			counties.forEach(function(county){
+				return countyData[county].boundaries.map(function(point){
+					return [xScale(point[0]), yScale(point[1])].join(",");
+				}).join(" ");
+			})
 		});
 	//updates graphs on side
 	for(var id = 1; id <= 8; id++){
