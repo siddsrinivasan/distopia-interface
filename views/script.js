@@ -3,11 +3,15 @@ var w = parseFloat(svg.style("width"));
 var h = parseFloat(svg.style("height"));
 
 var districtIDs = [0, 1, 2, 3, 4, 5, 6, 7];
+var minX, minY, maxX, maxY;
 
 var counter;
 var district_data;
 
 var state_padding = 20;
+
+var partisan_fill = d3.scaleLinear().domain([-1, 0, 1]).range(["#D0021B", "white", "#4A90E2"]);
+var income_fill = d3.scaleLinear().domain([0, 100]).range(["white", "green"]);
 
 $("#district-view").hide();
 
@@ -104,7 +108,9 @@ d3.json("records.json").then(function(data){
 		countyData.push({
 			id: county[0],
 			name: county[3],
-			boundaries: null
+			boundaries: null,
+			x: [null, null],
+			y: [null, null]
 		});
 	});
 });
@@ -117,15 +123,26 @@ function updateDistrictView(districtID){
 }
 
 function updateStateView(metric){
-	//update stateview
-	
-	//updates graphs on side
+	var districtBounds = [];
 	var metricData = [];
 	district_data.forEach(function(district){
+		districtBounds.push(district.boundaries);
 		district.metrics.forEach(function(m){
 			if(m.name == metric){ metricData.push(m); }
 		});
 	});
+
+	//update states graphic
+	var state = d3.select("#state");
+	state.selectAll("polygon")
+		.data(counties).enter().append("polygon")
+		.attr("class", function(county){ return county.name; })
+		.attr("points", function(county){
+			return county.boundaries.map(function(point){
+				return [xScale(point[0]), yScale(point[1])].join(",");
+			}).join(" ");
+		});
+	//updates graphs on side
 	for(var id = 1; id <= 8; id++){
 		var rect = d3.select("#" + id).selectAll("rectangle").data(metricData[id-1]);
 		var width = d3.select("#" + id).attr("width");
@@ -153,34 +170,44 @@ function parseData(labels, data){
 d3.json("polygons.json").then(function(data){
 	for(var i = 0; i < data.length; i++){
 		countyData[i].boundaries = data[i][0];
-		district.push(countyData[i]);
+		countyData[i].x[0] = d3.min(countyData[i].boundaries, function(countyPoint){
+			return countyPoint[0];
+		});
+		countyData[i].x[1] = d3.max(countyData[i].boundaries, function(countyPoint){
+			return countyPoint[0];
+		});
+		countyData[i].y[0] = d3.min(countyData[i].boundaries, function(countyPoint){
+			return countyPoint[1];
+		});
+		countyData[i].y[1] = d3.max(countyData[i].boundaries, function(countyPoint){
+			return countyPoint[1];
+		});
 	}
-	var minX = d3.min(district, function(county){
+	minX = d3.min(countyData, function(county){
 		return d3.min(county.boundaries, function(countyPoint){
 			return countyPoint[0];
 		});
 	});
-	var minY = d3.min(district, function(county){
+	minY = d3.min(countyData, function(county){
 		return d3.min(county.boundaries, function(countyPoint){
 			return countyPoint[1];
 		});
 	});
 
-	var maxX = d3.max(district, function(county){
+	maxX = d3.max(countyData, function(county){
 		return d3.max(county.boundaries, function(countyPoint){
 			return countyPoint[0];
 		});
 	});
-	var maxY = d3.max(district, function(county){
+	maxY = d3.max(countyData, function(county){
 		return d3.max(county.boundaries, function(countyPoint){
 			return countyPoint[1];
 		});
 	});
-	var x = [minX, maxX], y = [minY, maxY];
 
-	renderCounties(district, x, y);
+	//renderCounties(district, x, y);
 });
-
+/*
 function renderCounties(counties, xRange, yRange){
 	var scaling = h/((yRange[1]-yRange[0]));
 	var scaledWith = Math.ceil(scaling * (xRange[1]-xRange[0]));
@@ -195,4 +222,4 @@ function renderCounties(counties, xRange, yRange){
 				return [xScale(point[0]), yScale(point[1])].join(",");
 			}).join(" ");
 		});
-}
+}*/
