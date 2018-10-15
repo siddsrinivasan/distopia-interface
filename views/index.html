@@ -1,47 +1,76 @@
 <html>
-    <head>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.7.0/d3.js"></script>
-        <script type="text/javascript" src="http://static.robotwebtools.org/roslibjs/current/roslib.min.js"></script>
-        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css">
-    <link rel="stylesheet" type="text/css" href="style.css">
-    </head>
-    <body>
-
-        <div class="screen">
-          <div class="nav-corner">
-
-          </div>
-          <div class="nav-top">
-            <div class="button raised green">
-              <div class="center" fit>Begin Study</div>
-              <paper-ripple fit></paper-ripple>
-            </div>
-          </div>
-          <div class="nav-left">
-
-          </div>
-          <div class="panels">
-            <h2 id="title" >1st District</h2>
-            <div class="top-left">
-              <h3 class="subtitle">Race</h3>
-              <svg id="population"></svg>
-            </div>
-            <div class="top-right">
-              <h3 class="subtitle">Age</h3>
-              <svg id="demographics"></svg>
-            </div>
-            <br>
-            <div class="bottom-left">
-              <h3 class="subtitle">Partisan Lean</h3>
-              <h3 id="lean" class="subtitle">+4 Democrat</h3>
-              <svg id="state"></svg>
-            </div>
-            <div class="bottom-right">
-              <h3 class="subtitle">Education Level</h3>
-              <svg id="education"></svg>
-            </div>
-          </div>
-        </div>
-        <script src="script.js"></script>
-    </body>
+	<head>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.7.0/d3.js"></script>
+		<script type="text/javascript" src="http://static.robotwebtools.org/roslibjs/current/roslib.min.js"></script>
+		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css">
+		<script src="https://code.jquery.com/jquery-3.3.1.js" integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60=" crossorigin="anonymous"></script>
+		<link rel="stylesheet" type="text/css" href="style.css">
+	</head>
+	<body>
+		<div class="screen">
+			<div class="nav-corner"></div>
+			<div class="nav-top">
+				<h2 id="title">Wisconsin</h2>
+				<!--<div class="button raised green">
+					<div class="center" fit>Begin Study</div>
+					<paper-ripple fit></paper-ripple>
+				</div>-->
+			</div>
+			<div class="nav-left"></div>
+			<div class="panels" id="district-view">
+				<div class="top-left">
+					<h3 class="subtitle">Race</h3>
+					<svg id="population"></svg>
+				</div>
+				<div class="top-right">
+					<h3 class="subtitle">Age</h3>
+					<svg id="demographics"></svg>
+				</div>
+				<br>
+				<div class="bottom-left">
+					<h3 class="subtitle">Partisan Lean</h3>
+					<!--<h3 id="lean" class="subtitle">+4 Democrat</h3>-->
+					<svg id="district"></svg>
+				</div>
+				<div class="bottom-right">
+					<h3 class="subtitle">Education Level</h3>
+					<svg id="education"></svg>
+				</div>
+			</div>
+			<div class="panels" id="state-view">
+				<div class="right">
+					<div class="panel">
+						<svg id="1"></svg>
+					</div>
+					<div class="panel">
+						<svg id="2"></svg>
+					</div>
+					<div class="panel">
+						<svg id="3"></svg>
+					</div>
+					<div class="panel">
+						<svg id="4"></svg>
+					</div>
+				</div>
+				<div class="right">
+					<div class="panel">
+						<svg id="5"></svg>
+					</div>
+					<div class="panel">
+						<svg id="6"></svg>
+					</div>
+					<div class="panel">
+						<svg id="7"></svg>
+					</div>
+					<div class="panel">
+						<svg id="8"></svg>
+					</div>
+				</div>
+				<div class="left">
+					<svg id="state"></svg>
+				</div>
+			</div>
+		</div>
+		<script src="script.js"></script>
+	</body>
 </html>
