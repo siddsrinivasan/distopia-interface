@@ -14,7 +14,7 @@ var income_fill = d3.scaleLinear().domain([0, 100]).range(["white", "green"]);
 $("#district-view").hide();
 
 var ros = new ROSLIB.Ros({
-	url: 'ws://daarm.ngrok.io'
+	url: 'ws://localhost:9090'
 });
 
 ros.on('connection', function(){
@@ -43,18 +43,9 @@ var event_listener = new ROSLIB.Topic({
 
 district_listener.subscribe(function(message){
 	var jsonMess = JSON.parse(message.data);
-	console.log(jsonMess.count);
+	//console.log(jsonMess.count);
 	district_data = jsonMess;
 	updateStateView("hello");
-
-	//if(counter == null){ counter = jsonMess.count; }
-	//else{
-	//	if(counter < jsonMess.counter){ return; }
-	//	else{
-	//		district_data = jsonMess;
-	//		updateStateView("hello");
-	//	}
-	//}
 });
 
 event_listener.subscribe(function(message){
@@ -114,19 +105,56 @@ d3.json("polygons.json").then(function(data){
 			return countyPoint[1];
 		});
 	});
-
+	initateStateView();
 });
 var poly;
 var polygonData = [];
 var district = [];
 
-function updateDistrictView(districtID){
-	
+function initateStateView(){
+	console.log("initate");
+	var state = d3.select("#state").selectAll("polygon");
+
+	var stateW = parseFloat(d3.select("#state").style("width"));
+	var stateH = parseFloat(d3.select("#state").style("height"));
+
+	var xStateScale = d3.scaleLinear().domain([minX, maxX]).range([0, stateW]);
+	var yStateScale = d3.scaleLinear().domain([minY, maxY]).range([stateH, 0]);
+
+	state.data(countyData).enter().append("polygon")
+		.attr("points", function(county){
+			return county.boundaries.map(function(point){
+				return [xStateScale(point[0]), yStateScale(point[1])].join(",");
+			}).join(" ");
+		})
+		.style("fill", function(county){ 
+			if(county.fill == null) return "white";
+			else return county.fill;
+		});
 }
+
+function update(){
+	console.log("updating");
+	var colors = ["#E6AF82", "#82E0E6", "#A49AC9", "#BDE682", "#E68882", "white", "#C582E6"];
+
+	countyData.forEach(function(county){
+		var rand = colors[Math.floor(Math.random() * colors.length)];
+		county.fill = rand;
+	});
+
+	var state = d3.select("#state").selectAll("polygon").data(countyData);
+
+	state.style("fill", function(county){
+		return county.fill;
+	});
+}
+
+//randomize county colors
+
 
 function updateStateView(metric){
 	var metricData = [];
-	
+
 	if(metric != null){
 		district_data.districts.forEach(function(district, i){
 			district.metrics.forEach(function(m){
@@ -134,43 +162,36 @@ function updateStateView(metric){
 			});
 		});
 	}
-	
-	console.log(metricData);
+
+	var colors = ["#E6AF82", "#82E0E6", "#A49AC9", "#BDE682", "#E68882", "white", "#C582E6"];
 
 	//update states graphic
-	var state = d3.select("#state");
-
-	var stateW = parseFloat(state.style("width"));
-	var stateH = parseFloat(state.style("height"));
-
-	var xScale = d3.scaleLinear().domain([minX, maxX]).range([0, stateW]);
-	var yScale = d3.scaleLinear().domain([minY, maxY]).range([stateH, 0]);
-	
-	district_data.districts.forEach(function(distric){
-		console.log(district.precincts);
+	district_data.districts.forEach(function(district){
+		var rand = colors[Math.floor(Math.random() * colors.length)];
 		district.precincts.forEach(function(county){
-			console.log(county);
+			switch(metric){
+				case "race":
+					countyData[county].fill = rand;
+					break;
+			}
 		});
 	});
+
+	updateDistMap();
+
+	function updateDistMap(){
+		var state = d3.select("#state").selectAll("polygon").data(countyData);
+		
+		state.style("fill", function(county){
+			return county.fill;
+		});
+	}
 	
-	//d3.selectAll("#state > *").remove();
-
-	//state.selectAll("g").data(distric)
-
-	//state.selectAll("polygon").data(districtBounds);
-	//
-	//state.exit().remove();
-	//state.selectAll("polygon").enter().append("polygon")
-	//	.attr("points", function(d){
-	//		d.forEach(function(county){				
-	//			return countyData[county].boundaries.map(function(point){
-	//				return [xScale(point[0]), yScale(point[1])].join(",");
-	//			}).join(" ");
-	//		})
-	//	});
 	//updates graphs on side
 	for(var id = 1; id <= 8; id++){
-		var rect = d3.select("#" + "dist" + id).selectAll("rect").data(parseData(metricData[id-1].labels, metricData[id-1].data));
+		if(id == 1){ console.log(parseData(metricData[id-1].labels, metricData[id-1].data));}
+
+		
 		var width = parseFloat(d3.select("#" + "dist" + id).style("width"));
 		var height = parseFloat(d3.select("#" + "dist" + id).style("height"));
 
@@ -178,15 +199,23 @@ function updateStateView(metric){
 		var xBin = (width - 2 * state_padding)/(metricData[id-1].labels.length);
 
 		var sum = metricData[id-1].data.reduce((a, b) => a + b, 0);
-		console.log(sum);
+		
+		var rect = d3.select("#" + "dist" + id)
+			.selectAll("rect").data(parseData(metricData[id-1].labels, metricData[id-1].data))
+			.attr("x", function(d, i){ return state_padding + xBin * i; })
+			.attr("y", function(d){ return yScale(d.amount/sum); })
+			.attr("width", xBin)
+			.attr("height", function(d){ return height + state_padding - yScale(d.amount/sum); })
+			.attr("class", function(d){ return d.name; });
 
-		rect.exit().remove();
 		rect.enter().append("rect")
 			.attr("x", function(d, i){ return state_padding + xBin * i; })
 			.attr("y", function(d){ return yScale(d.amount/sum); })
 			.attr("width", xBin)
 			.attr("height", function(d){ return height + state_padding - yScale(d.amount/sum); })
-			.attr("class", function(d){ return d.name; })
+			.attr("class", function(d){ return d.name; });
+		
+		rect.exit().remove();
 	}
 }
 
