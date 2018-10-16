@@ -45,7 +45,7 @@ district_listener.subscribe(function(message){
 	var jsonMess = JSON.parse(message.data);
 	//console.log(jsonMess.count);
 	district_data = jsonMess;
-	updateStateView("hello");
+	//updateStateView("hello");
 });
 
 event_listener.subscribe(function(message){
@@ -151,6 +151,108 @@ function update(){
 
 //randomize county colors
 
+district_data = {
+	districts: [
+		{
+			name: 1,
+			metrics:[
+				{
+					name: "hello",
+					labels: [1,2,3,4,5],
+					data: null
+				}
+			]
+		},
+		{
+			name: 2,
+			metrics:[
+				{
+					name: "hello",
+					labels: [1,2,3,4,5],
+					data: null
+				}
+			]
+		},
+		{
+			name: 3,
+			metrics:[
+				{
+					name: "hello",
+					labels: [1,2,3,4,5],
+					data: null
+				}
+			]
+		},
+		{
+			name: 4,
+			metrics:[
+				{
+					name: "hello",
+					labels: [1,2,3,4,5],
+					data: null
+				}
+			]
+		},
+		{
+			name: 5,
+			metrics:[
+				{
+					name: "hello",
+					labels: [1,2,3,4,5],
+					data: null
+				}
+			]
+		},
+		{
+			name: 6,
+			metrics:[
+				{
+					name: "hello",
+					labels: [1,2,3,4,5],
+					data: null
+				}
+			]
+		},
+		{
+			name: 7,
+			metrics:[
+				{
+					name: "hello",
+					labels: [1,2,3,4,5],
+					data: null
+				}
+			]
+		},
+		{
+			name: 8,
+			metrics:[
+				{
+					name: "hello",
+					labels: [1,2,3,4,5],
+					data: null
+				}
+			]
+		},
+	]
+};
+
+function randomizeData(){
+	district_data.districts.forEach(function(district, i){
+		district.metrics.forEach(function(metric){
+			var d = [];
+			for(var i = 0; i < 6; i++){
+				d.push(Math.floor(Math.random() * 50) + 1);
+			}
+			metric.data = d;
+			console.log(metric);
+		});
+	});	
+}
+
+setInterval(function(){
+	randomizeData();
+	updateStateView("hello");
+}, 1000);
 
 function updateStateView(metric){
 	var metricData = [];
@@ -177,7 +279,7 @@ function updateStateView(metric){
 		});
 	});
 
-	updateDistMap();
+	//updateDistMap();
 
 	function updateDistMap(){
 		var state = d3.select("#state").selectAll("polygon").data(countyData);
