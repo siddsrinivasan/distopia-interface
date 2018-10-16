@@ -45,7 +45,7 @@ district_listener.subscribe(function(message){
 	var jsonMess = JSON.parse(message.data);
 	//console.log(jsonMess.count);
 	district_data = jsonMess;
-	//updateStateView("hello");
+	updateStateView("hello");
 });
 
 event_listener.subscribe(function(message){
@@ -249,10 +249,11 @@ function randomizeData(){
 	});	
 }
 
-setInterval(function(){
-	randomizeData();
-	updateStateView("hello");
-}, 1000);
+//randomizes data every second
+//setInterval(function(){
+//	randomizeData();
+//	updateStateView("hello");
+//}, 1000);
 
 function updateStateView(metric){
 	var metricData = [];
