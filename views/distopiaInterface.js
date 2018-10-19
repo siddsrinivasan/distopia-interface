@@ -17,7 +17,7 @@ class DistopiaInterface{
 		this.initRosBridge();
 		this.initDataListener();
 		this.initControlListener();
-
+		this.currentView = initialView;
 		this.scales = {
 			"partisanFill": d3.scaleLinear().domain([-1, 0, 1]).range(["#D0021B", "white", "#4A90E2"]),
 			"incomeFill": d3.scaleLinear().domain([0, 100]).range(["white", "green"])
@@ -71,10 +71,19 @@ class DistopiaInterface{
 	}
 
 	handleData(message){
-		var jsonMess = JSON.parse(message.data);
-		//console.log(jsonMess.count);
-		districts = jsonMess;
-		updateStateView("demographics");
+		//check the counter
+		const messageData = JSON.parse(message.data);
+		if(messageData.counter <= this.counter){
+			return;
+		}
+		this.counter = messageData.counter;
+		this.districts = messageData.districts;
+		if(this.currentView == "state"){
+			this.stateView.update(this.districts);
+		}
+		else{
+			this.districtView.update(this.districts);
+		}
 	}
 
 	handleCommand(message){
@@ -87,59 +96,7 @@ class DistopiaInterface{
 d = DistopianInterface();
 
 
-var svg = d3.select("#district");
 
-var districtIDs = [0, 1, 2, 3, 4, 5, 6, 7];
-var minX, minY, maxX, maxY;
-
-var counter;
-var districts;
-
-var statePadding = 20;
-
-var partisan_fill = d3.scaleLinear().domain([-1, 0, 1]).range(["#D0021B", "white", "#4A90E2"]);
-var income_fill = d3.scaleLinear().domain([0, 100]).range(["white", "green"]);
-
-$("#district-view").hide();
-
-var ros = new ROSLIB.Ros({
-	url: 'ws://localhost:9090'
-});
-
-ros.on('connection', function(){
-	console.log("Connected to ROS bridge");
-});
-
-ros.on('error', function(error){
-	console.log('Error connecting to websocket server: ', error);
-});
-
-ros.on('close', function() {
-	console.log('Connection to websocket server closed.');
-});
-
-var district_listener = new ROSLIB.Topic({
-	ros: ros,
-	name: '/evaluated_designs',
-	messageType : 'std_msgs/String'
-});
-
-var event_listener = new ROSLIB.Topic({
-	ros: ros,
-	name: '/tuio_control',
-	messageType : 'std_msgs/String'
-});
-
-district_listener.subscribe(function(message){
-	var jsonMess = JSON.parse(message.data);
-	//console.log(jsonMess.count);
-	districts = jsonMess;
-	updateStateView("demographics");
-});
-
-event_listener.subscribe(function(message){
-	console.log(message.data);
-});
 
 var countyBounds;
 
