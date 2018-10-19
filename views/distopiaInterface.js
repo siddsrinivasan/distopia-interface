@@ -1,12 +1,101 @@
+/*
+	DistopiaInterface
+	=================
+	The main controller for the Distopia HUD
+*/
+
+
+class DistopiaInterface{
+
+	constructor(initialView = "state"){
+		this.svg = d3.select("#district");
+		this.districtIDs = [0, 1, 2, 3, 4, 5, 6, 7];
+		this.minX = this.minY = this.maxX = this.maxY = 0;
+		this.counter = 0;
+		this.districts = [];
+		this.statePadding = 20;
+		this.initRosBridge();
+		this.initDataListener();
+		this.initControlListener();
+
+		this.scales = {
+			"partisanFill": d3.scaleLinear().domain([-1, 0, 1]).range(["#D0021B", "white", "#4A90E2"]),
+			"incomeFill": d3.scaleLinear().domain([0, 100]).range(["white", "green"])
+		}
+
+		if(initialView == "state"){
+			$("#district-view").hide();
+		}
+		else{
+			$("#state-view").hide();
+		}
+		
+
+	}
+
+	initRosBridge(){
+		this.ros = new ROSLIB.Ros({
+			url: 'ws://localhost:9090'
+		});
+		
+		this.ros.on('connection', function(){
+			console.log("Connected to ROS bridge");
+		});
+		
+		this.on('error', function(error){
+			console.log('Error connecting to websocket server: ', error);
+		});
+		
+		this.on('close', function() {
+			console.log('Connection to websocket server closed.');
+		});
+	}
+
+	initDataListener(){
+		this.dataListener = new ROSLIB.Topic({
+			ros: ros,
+			name: '/evaluated_designs',
+			messageType : 'std_msgs/String'
+		});
+
+		this.dataListener.subscribe(this.handleData);
+	}
+
+	initControlListener(){
+		this.controlListener = new ROSLIB.Topic({
+			ros: ros,
+			name: '/tuio_control',
+			messageType : 'std_msgs/String'
+		});
+		this.controlListener.subscribe(handleCommand);
+	}
+
+	handleData(message){
+		var jsonMess = JSON.parse(message.data);
+		//console.log(jsonMess.count);
+		districts = jsonMess;
+		updateStateView("demographics");
+	}
+
+	handleCommand(message){
+		console.log("Got Command:",message);
+	}
+
+	
+}
+
+d = DistopianInterface();
+
+
 var svg = d3.select("#district");
 
 var districtIDs = [0, 1, 2, 3, 4, 5, 6, 7];
 var minX, minY, maxX, maxY;
 
 var counter;
-var district_data;
+var districts;
 
-var state_padding = 20;
+var statePadding = 20;
 
 var partisan_fill = d3.scaleLinear().domain([-1, 0, 1]).range(["#D0021B", "white", "#4A90E2"]);
 var income_fill = d3.scaleLinear().domain([0, 100]).range(["white", "green"]);
@@ -44,8 +133,8 @@ var event_listener = new ROSLIB.Topic({
 district_listener.subscribe(function(message){
 	var jsonMess = JSON.parse(message.data);
 	//console.log(jsonMess.count);
-	district_data = jsonMess;
-	updateStateView("hello");
+	districts = jsonMess;
+	updateStateView("demographics");
 });
 
 event_listener.subscribe(function(message){
@@ -151,93 +240,8 @@ function update(){
 
 //randomize county colors
 
-district_data = {
-	districts: [
-		{
-			name: 1,
-			metrics:[
-				{
-					name: "hello",
-					labels: [1,2,3,4,5],
-					data: null
-				}
-			]
-		},
-		{
-			name: 2,
-			metrics:[
-				{
-					name: "hello",
-					labels: [1,2,3,4,5],
-					data: null
-				}
-			]
-		},
-		{
-			name: 3,
-			metrics:[
-				{
-					name: "hello",
-					labels: [1,2,3,4,5],
-					data: null
-				}
-			]
-		},
-		{
-			name: 4,
-			metrics:[
-				{
-					name: "hello",
-					labels: [1,2,3,4,5],
-					data: null
-				}
-			]
-		},
-		{
-			name: 5,
-			metrics:[
-				{
-					name: "hello",
-					labels: [1,2,3,4,5],
-					data: null
-				}
-			]
-		},
-		{
-			name: 6,
-			metrics:[
-				{
-					name: "hello",
-					labels: [1,2,3,4,5],
-					data: null
-				}
-			]
-		},
-		{
-			name: 7,
-			metrics:[
-				{
-					name: "hello",
-					labels: [1,2,3,4,5],
-					data: null
-				}
-			]
-		},
-		{
-			name: 8,
-			metrics:[
-				{
-					name: "hello",
-					labels: [1,2,3,4,5],
-					data: null
-				}
-			]
-		},
-	]
-};
-
 function randomizeData(){
-	district_data.districts.forEach(function(district, i){
+	districts.districts.forEach(function(district, i){
 		district.metrics.forEach(function(metric){
 			var d = [];
 			for(var i = 0; i < 6; i++){
@@ -259,7 +263,7 @@ function updateStateView(metric){
 	var metricData = [];
 
 	if(metric != null){
-		district_data.districts.forEach(function(district, i){
+		districts.districts.forEach(function(district, i){
 			district.metrics.forEach(function(m){
 				if(m.name == metric){ metricData.push(m); }
 			});
@@ -269,18 +273,23 @@ function updateStateView(metric){
 	var colors = ["#E6AF82", "#82E0E6", "#A49AC9", "#BDE682", "#E68882", "white", "#C582E6"];
 
 	//update states graphic
-	district_data.districts.forEach(function(district){
+	districts.districts.forEach(function(district){
 		var rand = colors[Math.floor(Math.random() * colors.length)];
-		district.precincts.forEach(function(county){
+		
 			switch(metric){
-				case "race":
-					countyData[county].fill = rand;
+				case "demographics":
+					whitePop = 	district.metrics[0].data[2] //this will not generalize!!!!
+					totalPop =  district.metrics[0].data[0]
+					summaryColor = d3.interpolatePurples(1-whitePop/(1.0*totalPop));
+					console.log("COLOR",whitePop, totalPop, summaryColor);
 					break;
 			}
+		district.precincts.forEach(function(county){
+			countyData[county].fill = summaryColor;
 		});
 	});
 
-	//updateDistMap();
+	updateDistMap();
 
 	function updateDistMap(){
 		var state = d3.select("#state").selectAll("polygon").data(countyData);
@@ -298,33 +307,34 @@ function updateStateView(metric){
 		var width = parseFloat(d3.select("#" + "dist" + id).style("width"));
 		var height = parseFloat(d3.select("#" + "dist" + id).style("height"));
 
-		var yScale = d3.scaleLinear().domain([0, 1]).range([height - state_padding, state_padding]);
-		var xBin = (width - 2 * state_padding)/(metricData[id-1].labels.length);
+		var yScale = d3.scaleLinear().domain([0, 1]).range([height - statePadding, statePadding]);
+		var xBin = (width - 2 * statePadding)/7.0;
 
-		var sum = metricData[id-1].data.reduce((a, b) => a + b, 0);
+		var sum = metricData[id-1].data.slice(3,10).reduce((a, b) => a + b, 0);
 		
 		var rect = d3.select("#" + "dist" + id)
 			.selectAll("rect").data(parseData(metricData[id-1].labels, metricData[id-1].data))
-			.attr("x", function(d, i){ return state_padding + xBin * i; })
+			.attr("x", function(d, i){ return statePadding + xBin * i; })
 			.attr("y", function(d){ return yScale(d.amount/sum); })
 			.attr("width", xBin)
-			.attr("height", function(d){ return height + state_padding - yScale(d.amount/sum); })
+			.attr("height", function(d){ return height + statePadding - yScale(d.amount/sum); })
 			.attr("class", function(d){ return d.name; });
 
 		rect.enter().append("rect")
-			.attr("x", function(d, i){ return state_padding + xBin * i; })
+			.attr("x", function(d, i){ return statePadding + xBin * i; })
 			.attr("y", function(d){ return yScale(d.amount/sum); })
 			.attr("width", xBin)
-			.attr("height", function(d){ return height + state_padding - yScale(d.amount/sum); })
+			.attr("height", function(d){ return height + statePadding - yScale(d.amount/sum); })
+			.attr("fill", function(d,i){ return colors[i]})
 			.attr("class", function(d){ return d.name; });
 		
 		rect.exit().remove();
 	}
 }
 
-function parseData(labels, data){
+export function parseData(labels, data, fields){
 	var objArray = [];
-	labels.forEach((label, i) => objArray.push({name: label, amount: data[i]}));
+	labels.forEach((label, i) => {if(fields.find(i)>=0) objArray.push({name: label, amount: data[i]})});
 	return objArray;
 }
 
