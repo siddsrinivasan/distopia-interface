@@ -222,43 +222,6 @@ function initateStateView(){
 		});
 }
 
-function update(){
-	console.log("updating");
-	var colors = ["#E6AF82", "#82E0E6", "#A49AC9", "#BDE682", "#E68882", "white", "#C582E6"];
-
-	countyData.forEach(function(county){
-		var rand = colors[Math.floor(Math.random() * colors.length)];
-		county.fill = rand;
-	});
-
-	var state = d3.select("#state").selectAll("polygon").data(countyData);
-
-	state.style("fill", function(county){
-		return county.fill;
-	});
-}
-
-//randomize county colors
-
-function randomizeData(){
-	districts.districts.forEach(function(district, i){
-		district.metrics.forEach(function(metric){
-			var d = [];
-			for(var i = 0; i < 6; i++){
-				d.push(Math.floor(Math.random() * 50) + 1);
-			}
-			metric.data = d;
-			console.log(metric);
-		});
-	});	
-}
-
-//randomizes data every second
-//setInterval(function(){
-//	randomizeData();
-//	updateStateView("hello");
-//}, 1000);
-
 function updateStateView(metric){
 	var metricData = [];
 
@@ -337,20 +300,3 @@ export function parseData(labels, data, fields){
 	labels.forEach((label, i) => {if(fields.find(i)>=0) objArray.push({name: label, amount: data[i]})});
 	return objArray;
 }
-
-/*
-function renderCounties(counties, xRange, yRange){
-	var scaling = h/((yRange[1]-yRange[0]));
-	var scaledWith = Math.ceil(scaling * (xRange[1]-xRange[0]));
-	var padding = (w - scaledWith)/2;
-	var xScale = d3.scaleLinear().domain(xRange).range([padding, Math.ceil(scaling * (xRange[1]-xRange[0]))+padding]);
-	var yScale = d3.scaleLinear().domain(yRange).range([Math.ceil(scaling * (yRange[1]-yRange[0])), 0]);
-	countyBounds = svg.selectAll("polygon")
-		.data(counties).enter().append("polygon")
-		.attr("class", function(county){ return county.name; })
-		.attr("points", function(county){
-			return county.boundaries.map(function(point){
-				return [xScale(point[0]), yScale(point[1])].join(",");
-			}).join(" ");
-		});
-}*/
