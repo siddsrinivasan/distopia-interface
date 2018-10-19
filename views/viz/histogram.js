@@ -1,50 +1,50 @@
 /*
-    Histogram
-    ==========
-    Generic histogram
-    Inputs:
-        selector: d3 selector, e.g. "#district7"
-        data: 
+	Histogram
+	==========
+	Generic histogram
+	Inputs:
+		selector: d3 selector, e.g. "#district7"
+		data: 
 */
 import {parseData} from '../distopiaInterface'
 
 class Histogram{
-    constructor(selector, initialData, fields, styles) {
-        this.selector = selector;
-        this.styles = styles;
-        this.fields = fields;
-        this.render(initialData);
-    }
+	constructor(selector, initialData, fields, styles) {
+		this.selector = selector;
+		this.styles = styles;
+		this.fields = fields;
+		this.render(initialData);
+	}
 
-    render(data){
-        const colors = this.styles.colors;
-        const width = parseFloat(d3.select(selector).style("width"));
-        const height = parseFloat(d3.select(selector).style("height"));
+	render(data){
+		const colors = this.styles.colors;
+		const width = parseFloat(d3.select(selector).style("width"));
+		const height = parseFloat(d3.select(selector).style("height"));
 
-        const yScale = d3.scaleLinear().domain([0, 1]).range([height - statePadding, statePadding]);
-        const binWidth = (width - 2 * statePadding)/7.0;
+		const yScale = d3.scaleLinear().domain([0, 1]).range([height - statePadding, statePadding]);
+		const binWidth = (width - 2 * statePadding)/7.0;
 
-        //sum across the frequency bins to normalize the counts
-        const sum = frequencies.reduce((a, b) => a + b, 0);
+		//sum across the frequency bins to normalize the counts
+		const sum = frequencies.reduce((a, b) => a + b, 0);
 
-        let rect = d3.select(this.selector)
-            .selectAll("rect").data(parseData(labels, frequencies, self.fields))
-            .attr("x", function(d, i){ return statePadding + binWidth * i; })
-            .attr("y", function(d){ return yScale(d.amount/sum); })
-            .attr("width", binWidth)
-            .attr("height", function(d){ return height + statePadding - yScale(d.amount/sum); })
-            .attr("class", function(d){ return d.name; });
+		let rect = d3.select(this.selector)
+			.selectAll("rect").data(parseData(labels, frequencies, self.fields))
+			.attr("x", function(d, i){ return statePadding + binWidth * i; })
+			.attr("y", function(d){ return yScale(d.amount/sum); })
+			.attr("width", binWidth)
+			.attr("height", function(d){ return height + statePadding - yScale(d.amount/sum); })
+			.attr("class", function(d){ return d.name; });
 
-        rect.enter().append("rect")
-            .attr("x", function(d, i){ return statePadding + binWidth * i; })
-            .attr("y", function(d){ return yScale(d.amount/sum); })
-            .attr("width", binWidth)
-            .attr("height", function(d){ return height + statePadding - yScale(d.amount/sum); })
-            .attr("fill", function(d,i){ return colors[i]})
-            .attr("class", function(d){ return d.name; });
-        
-        rect.exit().remove();
-    }
+		rect.enter().append("rect")
+			.attr("x", function(d, i){ return statePadding + binWidth * i; })
+			.attr("y", function(d){ return yScale(d.amount/sum); })
+			.attr("width", binWidth)
+			.attr("height", function(d){ return height + statePadding - yScale(d.amount/sum); })
+			.attr("fill", function(d,i){ return colors[i]})
+			.attr("class", function(d){ return d.name; });
+		
+		rect.exit().remove();
+	}
 
 }
 

@@ -1,14 +1,14 @@
 /*
-    districtView
-    =============
-    Wrapper for the district level "baseball card" view
+	districtView
+	=============
+	Wrapper for the district level "baseball card" view
 */
 
 class DistrictView {
-    constructor(){
-        
-    }
+	constructor(){
+		
+	}
 
 }
-
+	
 export default DistrictView;
