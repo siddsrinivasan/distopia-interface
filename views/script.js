@@ -43,7 +43,6 @@ var event_listener = new ROSLIB.Topic({
 
 district_listener.subscribe(function(message){
 	var jsonMess = JSON.parse(message.data);
-	//console.log(jsonMess.count);
 	district_data = jsonMess;
 	updateStateView("hello");
 });
@@ -149,8 +148,6 @@ function update(){
 	});
 }
 
-//randomize county colors
-
 district_data = {
 	districts: [
 		{
@@ -235,25 +232,6 @@ district_data = {
 		},
 	]
 };
-
-function randomizeData(){
-	district_data.districts.forEach(function(district, i){
-		district.metrics.forEach(function(metric){
-			var d = [];
-			for(var i = 0; i < 6; i++){
-				d.push(Math.floor(Math.random() * 50) + 1);
-			}
-			metric.data = d;
-			console.log(metric);
-		});
-	});	
-}
-
-//randomizes data every second
-//setInterval(function(){
-//	randomizeData();
-//	updateStateView("hello");
-//}, 1000);
 
 function updateStateView(metric){
 	var metricData = [];
