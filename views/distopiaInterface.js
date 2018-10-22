@@ -14,7 +14,6 @@ class DistopiaInterface{
 		this.counter = 0;
 		this.districts = [];
 		this.counties = [];
-		this.statePadding = 20;
 		this.initRosBridge();
 		this.initDataListener();
 		this.initControlListener();
@@ -145,7 +144,7 @@ class DistopiaInterface{
 		});
 	}
 
-	modifyCounty(id, data){
+	set modifyCounty(id, data){
 		if(this.counties[id] != null){
 			this.counties[id] = data;
 			return true;
@@ -155,13 +154,20 @@ class DistopiaInterface{
 		}
 	}
 
-	getCounty(id){
+	get getCounty(id){
 		if(this.counties[id] != null){
 			return this.counties[id];
 		}
 		else { return false; }
 	}
 }
+
+function parseData(labels, data){
+	var objArray = [];
+	labels.forEach((label, i) => objArray.push({name: label, amount: data[i]}));
+	return objArray;
+}
+
 
 d = DistopianInterface();
 d.initDataListener();
