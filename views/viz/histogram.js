@@ -6,20 +6,18 @@
 		selector: d3 selector, e.g. "#district7"
 		data: 
 */
-import {parseData} from '../distopiaInterface'
+import {parseData} from '../distopiaInterface';
 
 const padding = 20;
 
 class Histogram{
-	constructor(selector, initialData, fields, styles) {
+	constructor(selector, initialData, labels, styles) {
 		this.selector = selector;
-		this.styles = styles;
-		this.fields = fields;
-		this.render(initialData);
+		this.render(initialData, labels, styles);
 	}
 
-	render(data){
-		const colors = this.styles.colors;
+	render(data, labels, styles){
+		const colors = styles.colors;
 		const width = parseFloat(d3.select(selector).style("width"));
 		const height = parseFloat(d3.select(selector).style("height"));
 
@@ -30,24 +28,26 @@ class Histogram{
 		const sum = frequencies.reduce((a, b) => a + b, 0);
 
 		let rect = d3.select(this.selector)
-			.selectAll("rect").data(parseData(labels, frequencies, self.fields))
+			.selectAll("rect").data(parseData(labels, data))
 			.attr("x", function(d, i){ return padding + binWidth * i; })
 			.attr("y", function(d){ return yScale(d.amount/sum); })
 			.attr("width", binWidth)
 			.attr("height", function(d){ return height + padding - yScale(d.amount/sum); })
-			.attr("class", function(d){ return d.name; });
+			.attr("fill", function(d,i){ return colors[labels[i]]});
 
 		rect.enter().append("rect")
 			.attr("x", function(d, i){ return padding + binWidth * i; })
 			.attr("y", function(d){ return yScale(d.amount/sum); })
 			.attr("width", binWidth)
 			.attr("height", function(d){ return height + padding - yScale(d.amount/sum); })
-			.attr("fill", function(d,i){ return colors[i]})
-			.attr("class", function(d){ return d.name; });
+			.attr("fill", function(d,i){ return colors[labels[i]]});
 		
 		rect.exit().remove();
 	}
 
+	update(data, labels, styles) {
+		this.render(data, labels, styles);
+	}
 }
 
 export default Histogram;

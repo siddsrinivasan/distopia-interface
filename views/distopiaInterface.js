@@ -4,10 +4,34 @@
 	The main controller for the Distopia HUD
 */
 
-class DistopiaInterface{
-	
-	minX; minY; maxX; maxY;
+var minX, minY, maxX, maxY;
 
+//These are global color scales for different metrics
+//To invoke, scales.[NAME OF SCALE](VALUE) ex: scales.partisanFill(0.5)
+var scales = {
+	partisanFill : d3.scaleLinear().domain([-1, 0, 1]).range(["#D0021B", "white", "#4A90E2"]),
+	incomeFill : d3.scaleLinear().domain([0, 100]).range(["white", "green"])
+}
+
+var metrics = ["income","age","sex","race","education","occupation","population","votes","pvi","wasted_votes","compactness"]
+
+
+var styles = {
+
+	race: {
+		colors:{
+			white: "#FFFFF",
+			black: "#AAAAA"
+		}
+	},
+}
+
+class DistopiaInterface{
+	/*
+		This class interfaces between the TUI and the HUD.$
+		It contains the ROS initialization and listener callbacks
+		It also initializes the state and district views.						
+	*/
 	constructor(initialView = "state"){
 		this.svg = d3.select("#district");
 		this.districtIDs = [0, 1, 2, 3, 4, 5, 6, 7];
@@ -19,11 +43,7 @@ class DistopiaInterface{
 		this.initControlListener();
 		this.setupCounties();
 		this.currentView = initialView;
-		this.scales = {
-			"partisanFill": d3.scaleLinear().domain([-1, 0, 1]).range(["#D0021B", "white", "#4A90E2"]),
-			"incomeFill": d3.scaleLinear().domain([0, 100]).range(["white", "green"])
-		}
-
+	
 		if(initialView == "state"){
 			$("#district-view").hide();
 			$("#state-view").show();
@@ -43,18 +63,18 @@ class DistopiaInterface{
 			console.log("Connected to ROS bridge");
 		});
 		
-		this.on('error', function(error){
+		this.ros.on('error', function(error){
 			console.log('Error connecting to websocket server: ', error);
 		});
 		
-		this.on('close', function() {
+		this.ros.on('close', function() {
 			console.log('Connection to websocket server closed.');
 		});
 	}
 
 	initDataListener(){
 		this.dataListener = new ROSLIB.Topic({
-			ros: ros,
+			ros: this.ros,
 			name: '/evaluated_designs',
 			messageType : 'std_msgs/String'
 		});
@@ -64,11 +84,11 @@ class DistopiaInterface{
 
 	initControlListener(){
 		this.controlListener = new ROSLIB.Topic({
-			ros: ros,
+			ros: this.ros,
 			name: '/tuio_control',
 			messageType : 'std_msgs/String'
 		});
-		this.controlListener.subscribe(handleCommand);
+		this.controlListener.subscribe(this.handleCommand);
 	}
 
 	handleData(message){
@@ -92,9 +112,10 @@ class DistopiaInterface{
 	}
 
 	setupCounties(){
+		let self = this;
 		d3.json("records.json").then(function(data){
 			data.forEach(function(county){
-				this.counties.push({
+				self.counties.push({
 					id: county[0],
 					name: county[3],
 					boundaries: null,
@@ -106,45 +127,45 @@ class DistopiaInterface{
 		});
 		d3.json("polygons.json").then(function(data){
 			for(var i = 0; i < data.length; i++){
-				this.counties[i].boundaries = data[i][0];
-				this.counties[i].x[0] = d3.min(this.counties[i].boundaries, function(countyPoint){
+				self.counties[i].boundaries = data[i][0];
+				self.counties[i].x[0] = d3.min(self.counties[i].boundaries, function(countyPoint){
 					return countyPoint[0];
 				});
-				this.counties[i].x[1] = d3.max(this.counties[i].boundaries, function(countyPoint){
+				self.counties[i].x[1] = d3.max(self.counties[i].boundaries, function(countyPoint){
 					return countyPoint[0];
 				});
-				this.counties[i].y[0] = d3.min(this.counties[i].boundaries, function(countyPoint){
+				self.counties[i].y[0] = d3.min(self.counties[i].boundaries, function(countyPoint){
 					return countyPoint[1];
 				});
-				this.counties[i].y[1] = d3.max(this.counties[i].boundaries, function(countyPoint){
+				self.counties[i].y[1] = d3.max(self.counties[i].boundaries, function(countyPoint){
 					return countyPoint[1];
 				});
 			}
-			minX = d3.min(this.counties, function(county){
+			minX = d3.min(self.counties, function(county){
 				return d3.min(county.boundaries, function(countyPoint){
 					return countyPoint[0];
 				});
 			});
-			minY = d3.min(this.counties, function(county){
+			minY = d3.min(self.counties, function(county){
 				return d3.min(county.boundaries, function(countyPoint){
 					return countyPoint[1];
 				});
 			});
-			maxX = d3.max(this.counties, function(county){
+			maxX = d3.max(self.counties, function(county){
 				return d3.max(county.boundaries, function(countyPoint){
 					return countyPoint[0];
 				});
 			});
-			maxY = d3.max(this.counties, function(county){
+			maxY = d3.max(self.counties, function(county){
 				return d3.max(county.boundaries, function(countyPoint){
 					return countyPoint[1];
 				});
 			});
-			initateStateView();
+			//initateStateView();
 		});
 	}
 
-	set modifyCounty(id, data){
+	modifyCounty(id, data){
 		if(this.counties[id] != null){
 			this.counties[id] = data;
 			return true;
@@ -153,8 +174,8 @@ class DistopiaInterface{
 			return false;
 		}
 	}
-
-	get getCounty(id){
+//first call getCounty id and then modify
+	getCounty(id){
 		if(this.counties[id] != null){
 			return this.counties[id];
 		}
@@ -162,13 +183,12 @@ class DistopiaInterface{
 	}
 }
 
-function parseData(labels, data){
-	var objArray = [];
+export const parseData = (labels, data) => {
+	let objArray = [];
 	labels.forEach((label, i) => objArray.push({name: label, amount: data[i]}));
 	return objArray;
 }
 
-
-d = DistopianInterface();
+var d = new DistopiaInterface();
 d.initDataListener();
 d.initControlListener();

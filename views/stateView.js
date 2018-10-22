@@ -3,56 +3,26 @@
 	==========
 	A statewide view of a selected metric, with a heatmap and a set of histograms
 */
-import {parseData} from '../distopiaInterface'
+import {parseData} from './distopiaInterface.js'
 
 class StateView {
 	
-	constructor(initData, metricFocus){
-		this.metricFocus = metricFocus ? metricFocus : "demographics";
+	constructor(initData, metricFocus = "demographics"){
+		this.metricFocus = metricFocus;
 		console.log("Initiating State View");
 		this.stateDiv = d3.select("#state").selectAll("polygon");
 	
 		this.width = parseFloat(d3.select("#state").style("width"));
 		this.height = parseFloat(d3.select("#state").style("height"));
 
-		this.drawStatePolygons();
-
 		this.xScale = d3.scaleLinear().domain([minX, maxX]).range([0, this.width]);
 		this.yScale = d3.scaleLinear().domain([minY, maxY]).range([this.height, 0]);
 
-		this.histgrams = [];
-		for(var i = 0; i < 8; i++){
-			new histgram("#" + "dist" + id, )
-		}
+		this.drawStatePolygons();
 
-		for(var id = 1; id <= 8; id++){
-			if(id == 1){ console.log(parseData(metricData[id-1].labels, metricData[id-1].data));}
-	
-			var width = parseFloat(d3.select("#" + "dist" + id).style("width"));
-			var height = parseFloat(d3.select("#" + "dist" + id).style("height"));
-	
-			var yScale = d3.scaleLinear().domain([0, 1]).range([height + state_padding, state_padding]);
-			var xBin = (width - 2 * state_padding)/7.0;
-	
-			var sum = metricData[id-1].data.slice(3,10).reduce((a, b) => a + b, 0);
-			
-			var rect = d3.select("#" + "dist" + id)
-				.selectAll("rect").data(parseData(metricData[id-1].labels, metricData[id-1].data))
-				.attr("x", function(d, i){ return state_padding + xBin * i; })
-				.attr("y", function(d){ return yScale(d.amount/sum); })
-				.attr("width", xBin)
-				.attr("height", function(d){ return height + state_padding - yScale(d.amount/sum); })
-				.attr("class", function(d){ return d.name; });
-	
-			rect.enter().append("rect")
-				.attr("x", function(d, i){ return state_padding + xBin * i; })
-				.attr("y", function(d){ return yScale(d.amount/sum); })
-				.attr("width", xBin)
-				.attr("height", function(d){ return height + state_padding - yScale(d.amount/sum); })
-				.attr("fill", function(d,i){ return colors[i]})
-				.attr("class", function(d){ return d.name; });
-			
-			rect.exit().remove();
+		this.histograms = [];
+		for(var i = 0; i < 8; i++){
+			this.histograms.push(new histogram("#" + "dist" + id, initData[i].data, initData[i].labels, styles[this.metricFocus]));
 		}
 	}
 	
@@ -68,8 +38,10 @@ class StateView {
 		});
 	}
 
-	paintHistograms(data){
-		
+	paintHistograms(data, labels){
+		for(var i = 0; i < 8; i++){
+			this.histograms[i].update(data[i], labels, styles[this.metricFocus]);
+		}
 	}
 
 	update(data,metric){
@@ -101,7 +73,7 @@ class StateView {
 		this.paintHistograms(districtData);	
 	}
 
-	///ABSOLUTELY DO NOT USE THIS EXCEPT TO CHECK IF DATA BINDING IS WORKING
+	//ABSOLUTELY DO NOT USE THIS EXCEPT TO CHECK IF DATA BINDING IS WORKING
 	//THIS WILL MESS UP ALL REAL DATA
 	randomizeData(){
 		var colors = ["#E6AF82", "#82E0E6", "#A49AC9", "#BDE682", "#E68882", "white", "#C582E6"];
@@ -159,6 +131,7 @@ class StateView {
 	}
 
 	drawStatePolygons(){
+		//TODO: change how referencing counties
 		this.stateDiv.data(d.counties).enter().append("polygon")
 			.attr("points", function(county){
 				return county.boundaries.map(function(point){
