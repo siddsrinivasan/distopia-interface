@@ -4,19 +4,20 @@
 	The main controller for the Distopia HUD
 */
 
-var minX, minY, maxX, maxY;
+var MIN_X, MIN_Y, MAX_X, MAX_Y;
 
 //These are global color scales for different metrics
 //To invoke, scales.[NAME OF SCALE](VALUE) ex: scales.partisanFill(0.5)
-var scales = {
+var SCALE = {
 	partisanFill : d3.scaleLinear().domain([-1, 0, 1]).range(["#D0021B", "white", "#4A90E2"]),
 	incomeFill : d3.scaleLinear().domain([0, 100]).range(["white", "green"])
 }
 
-var metrics = ["income","age","sex","race","education","occupation","population","votes","pvi","wasted_votes","compactness"]
+var METRICS = ["income","age","sex","race","education","occupation","population","projected_votes","pvi","wasted_votes","compactness"]
 
+var METRIC_TYPE = ["histogram","histogram","histogram","histogram","histogram","histogram","scalar","histogram","scalar","histogram","scalar"]
 
-var styles = {
+var STYLES = {
 
 	race: {
 		colors:{

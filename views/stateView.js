@@ -4,6 +4,7 @@
 	A statewide view of a selected metric, with a heatmap and a set of histograms
 */
 import {parseData} from './distopiaInterface.js'
+import Histogram from "./viz/histogram.js";
 
 class StateView {
 	
@@ -22,7 +23,7 @@ class StateView {
 
 		this.histograms = [];
 		for(var i = 0; i < 8; i++){
-			this.histograms.push(new histogram("#" + "dist" + id, initData[i].data, initData[i].labels, styles[this.metricFocus]));
+			this.histograms.push(new Histogram("#" + "dist" + id, initData[i].data, initData[i].labels, styles[this.metricFocus]));
 		}
 	}
 	
