@@ -34,7 +34,6 @@ class DistopiaInterface{
 		It also initializes the state and district views.						
 	*/
 	constructor(initialView = "state"){
-		this.svg = d3.select("#district");
 		this.districtIDs = [0, 1, 2, 3, 4, 5, 6, 7];
 		this.counter = 0;
 		this.districts = [];
@@ -43,6 +42,12 @@ class DistopiaInterface{
 		this.initDataListener();
 		this.initControlListener();
 		this.setupCounties();
+
+		//initializes stateView and districtView classes as null variables
+		//(easy way to check if they need to be initialized)
+		this.stateView = null;
+		this.districtView = null;
+
 		this.currentView = initialView;
 	
 		if(initialView == "state"){
@@ -101,10 +106,12 @@ class DistopiaInterface{
 		this.counter = messageData.counter;
 		this.districts = messageData.districts;
 		if(this.currentView == "state"){
-			this.stateView.update(this.districts);
+			if(this.stateView == null){ this.stateView(this.districts); }
+			else{ this.stateView.update(this.districts); }
 		}
 		else{
-			this.districtView.update(this.districts);
+			if(this.districtView == null){ this.districtView(this.districts); }
+			else{ this.districtView.update(this.districts); }
 		}
 	}
 
@@ -166,6 +173,19 @@ class DistopiaInterface{
 		});
 	}
 
+	toggleView(){
+		if(this.currentView == "state"){
+			$("#district-view").hide();
+			$("#state-view").show();
+			this.currentView = "district";
+		}
+		else{
+			$("#state-view").hide();
+			$("#district-view").show();
+			this.currentView = "state";
+		}
+	}
+	
 	modifyCounty(id, data){
 		if(this.counties[id] != null){
 			this.counties[id] = data;
@@ -175,7 +195,8 @@ class DistopiaInterface{
 			return false;
 		}
 	}
-//first call getCounty id and then modify
+	
+	//first call getCounty id and then modify
 	getCounty(id){
 		if(this.counties[id] != null){
 			return this.counties[id];
@@ -193,3 +214,7 @@ export const parseData = (labels, data) => {
 var d = new DistopiaInterface();
 d.initDataListener();
 d.initControlListener();
+
+$(".button").click(() =>{
+	d.toggleView();
+});
