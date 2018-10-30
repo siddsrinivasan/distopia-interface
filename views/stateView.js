@@ -51,7 +51,7 @@ class StateView {
 
 		//pull the metric wanted for each district
 		let districtData = []
-		d.districts.forEach(district => {
+		data.districts.forEach(district => {
 			district.metrics.forEach(m =>{
 				if(m.name == metric){
 					districtData.push(m);
