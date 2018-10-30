@@ -6,7 +6,7 @@
 		selector: d3 selector, e.g. "#district7"
 		data: 
 */
-import {parseData} from '../distopiaInterface';
+import {parseData} from '../distopiaInterface.js';
 
 const padding = 20;
 

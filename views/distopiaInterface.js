@@ -142,22 +142,22 @@ class DistopiaInterface{
 					return countyPoint[1];
 				});
 			}
-			minX = d3.min(self.counties, function(county){
+			MIN_X = d3.min(self.counties, function(county){
 				return d3.min(county.boundaries, function(countyPoint){
 					return countyPoint[0];
 				});
 			});
-			minY = d3.min(self.counties, function(county){
+			MIN_Y = d3.min(self.counties, function(county){
 				return d3.min(county.boundaries, function(countyPoint){
 					return countyPoint[1];
 				});
 			});
-			maxX = d3.max(self.counties, function(county){
+			MAX_X = d3.max(self.counties, function(county){
 				return d3.max(county.boundaries, function(countyPoint){
 					return countyPoint[0];
 				});
 			});
-			maxY = d3.max(self.counties, function(county){
+			MAX_Y = d3.max(self.counties, function(county){
 				return d3.max(county.boundaries, function(countyPoint){
 					return countyPoint[1];
 				});
