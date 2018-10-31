@@ -36,9 +36,9 @@ class Histogram{
 
 		//adds axis to the histogram
 		d3.select(this.selector).append("g").call(xAxis)
-			.attr("transform", "translate(" + [padding, height - padding], ")");
+			.attr("transform", "translate(" + [padding, height - padding]+ ")");
 		d3.select(this.selector).append("g").call(yAxis)
-			.attr("transform", "translate(" + [padding, padding], ")");
+			.attr("transform", "translate(" + [padding, padding]+ ")");
 
 		//enters data
 		let rect = d3.select(this.selector)
