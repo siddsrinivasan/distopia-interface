@@ -21,15 +21,18 @@ class Histogram{
 		const width = parseFloat(d3.select(this.selector).style("width"));
 		const height = parseFloat(d3.select(this.selector).style("height"));
 
-		const xScale = d3.scaleOrdinal().domain(labels.map(function(d){ return d; })).range([padding, width - padding])
-			.paddingInner([0.1]).paddingOuter([0.2]).align([0.5]);
+		const xScale = d3.scaleBand().domain(labels.map(function(d){ return d[0]; }))
+										.range([padding, width - padding])
+										.paddingInner([0.1])
+										.paddingOuter([0.2])
+										.align([0.5])
 		const yScale = d3.scaleLinear().domain([0, 1]).range([padding, height - padding]);
 
 		const xAxis = d3.axisBottom(xScale);
 		const yAxis = d3.axisLeft(yScale);
 
 		//sum across the frequency bins to normalize the counts
-		const sum = frequencies.reduce((a, b) => a + b, 0);
+		const sum = data.reduce((a, b) => a + b, 0);
 
 		//adds axis to the histogram
 		d3.select(this.selector).append("g").call(xAxis)

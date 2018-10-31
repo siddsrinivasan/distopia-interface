@@ -16,18 +16,30 @@ export var SCALE = {
 	incomeFill : d3.scaleLinear().domain([0, 100]).range(["white", "green"])
 }
 
-var METRICS = ["income","age","sex","race","education","occupation","population","projected_votes","pvi","wasted_votes","compactness"]
-
-var METRIC_TYPE = ["histogram","histogram","histogram","histogram","histogram","histogram","scalar","histogram","scalar","histogram","scalar"]
-
-var STYLES = {
+//export const METRICS = ["income","age","sex","race","education","occupation","population","projected_votes","pvi","wasted_votes","compactness"]
+export const METRICS = ["age","education","income","occupation","population","projected_votes","race","sex"]
+//export const METRIC_TYPE = ["histogram","histogram","histogram","histogram","histogram","histogram","scalar","histogram","scalar","histogram","scalar"]
+export const METRIC_TYPE = ["histogram","histogram","histogram","histogram","histogram","histogram","histogram","histogram"]
+export const STYLES = {
 
 	race: {
 		colors:{
 			white: "#FFFFF",
-			black: "#AAAAA"
+			black: "#AAAAA",
+			hispanic: "#14325",
+			asian: "#74654",
+			american_indian: "#ac235",
+			pacific_islander: "#ccccc",
+			other: "#00000",
+			two_or_more: "#4444"
 		}
 	},
+	population: {
+		colors:{
+			total: "#FFFFF",
+			voting: "#AAAAA"
+		}
+	}
 }
 
 var SELF;
@@ -52,8 +64,8 @@ export class DistopiaInterface{
 
 		//initializes stateView and districtView classes as null variables
 		//(easy way to check if they need to be initialized)
-		this.stateView = new StateView(null);
-		this.districtView = new DistrictView(null);
+		this.stateView = new StateView(null,"population");
+		//this.districtView = new DistrictView(null);
 
 		this.currentView = initialView;
 		console.log(this.currentView);
@@ -70,7 +82,7 @@ export class DistopiaInterface{
 
 	initRosBridge(){
 		this.ros = new ROSLIB.Ros({
-			url: 'ws://localhost:9090'
+			url: 'ws://daarm.ngrok.io'
 		});
 		
 		this.ros.on('connection', function(){
@@ -142,6 +154,22 @@ export class DistopiaInterface{
 
 	handleCommand(message){
 		console.log("Got Command:",message);
+		const messageData = JSON.parse(message.data);
+		if(messageData.cmd == "focus_state"){
+			if(SELF.stateView.getMetricFocus() != messageData.param){
+				SELF.stateView.update(SELF.districts,messageData.param);	
+			}
+			if(SELF.getView() != "state"){
+				SELF.toggleView();
+			}
+		}
+		else{
+			SELF.districtView.setDistrictFocus(messageData.district) //this may not be right
+			if(SELF.getView() != "district"){
+				SELF.toggleView();
+			}
+		}
+
 	}
 
 	setupCounties(){
