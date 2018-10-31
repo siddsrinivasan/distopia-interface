@@ -6,7 +6,7 @@
 import {parseData} from './distopiaInterface.js'
 import Histogram from "./viz/histogram.js";
 
-class DistrictView {
+export class DistrictView {
 	constructor(districtId = 0){
 		console.log("I'm a district, look at me go!");
 		this.districtFocus = districtId;
@@ -21,7 +21,7 @@ class DistrictView {
 		//for different viz, use same structure as histogram.js
 		//just instantiate it and pass the html id as a selector for that viz
 		this.metricPlots = {};
-			
+		
 		METRICS.forEach((metric, i) => {
 			switch (METRIC_TYPE[i]){
 				case "histogram":

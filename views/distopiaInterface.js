@@ -4,11 +4,14 @@
 	The main controller for the Distopia HUD
 */
 
-var MIN_X, MIN_Y, MAX_X, MAX_Y;
+import {DistrictView} from "./districtView.js";
+import {StateView} from "./stateView.js";
+
+export var MIN_X, MIN_Y, MAX_X, MAX_Y;
 
 //These are global color scales for different metrics
 //To invoke, scales.[NAME OF SCALE](VALUE) ex: scales.partisanFill(0.5)
-var SCALE = {
+export var SCALE = {
 	partisanFill : d3.scaleLinear().domain([-1, 0, 1]).range(["#D0021B", "white", "#4A90E2"]),
 	incomeFill : d3.scaleLinear().domain([0, 100]).range(["white", "green"])
 }
@@ -27,7 +30,9 @@ var STYLES = {
 	},
 }
 
-class DistopiaInterface{
+var SELF;
+
+export class DistopiaInterface{
 	/*
 		This class interfaces between the TUI and the HUD.$
 		It contains the ROS initialization and listener callbacks
@@ -43,13 +48,16 @@ class DistopiaInterface{
 		this.initControlListener();
 		this.setupCounties();
 
+		SELF = this;
+
 		//initializes stateView and districtView classes as null variables
 		//(easy way to check if they need to be initialized)
-		this.stateView = null;
-		this.districtView = null;
+		this.stateView = new StateView(null);
+		this.districtView = new DistrictView(null);
 
 		this.currentView = initialView;
-	
+		console.log(this.currentView);
+
 		if(initialView == "state"){
 			$("#district-view").hide();
 			$("#state-view").show();
@@ -84,7 +92,7 @@ class DistopiaInterface{
 			name: '/evaluated_designs',
 			messageType : 'std_msgs/String'
 		});
-
+		console.log("starting data listening");
 		this.dataListener.subscribe(this.handleData);
 	}
 
@@ -97,21 +105,38 @@ class DistopiaInterface{
 		this.controlListener.subscribe(this.handleCommand);
 	}
 
+	updateView(data){
+		this.counter = messageData.counter;
+		this.districts = messageData.districts;
+		if(this.getView() == "state"){
+			console.log("handling for state");
+			this.stateView.update(this.districts);
+		}
+		else{
+			console.log("handling for district");
+			this.districtView.update(this.districts);
+		}
+	}
+
 	handleData(message){
 		//check the counter
 		const messageData = JSON.parse(message.data);
-		if(messageData.counter <= this.counter){
+		console.log(messageData);
+		if(messageData.counter <= SELF.counter){
 			return;
 		}
-		this.counter = messageData.counter;
-		this.districts = messageData.districts;
-		if(this.currentView == "state"){
-			if(this.stateView == null){ this.stateView(this.districts); }
-			else{ this.stateView.update(this.districts); }
+		SELF.counter = messageData.counter;
+		SELF.districts = messageData.districts;
+		if(SELF.getView() == "state"){
+			console.log("handling for state");
+			console.log(SELF.stateView);
+			if(SELF.stateView == null){ SELF.stateView = new StateView(SELF.districts); }
+			else{ SELF.stateView.update(SELF.districts); }
 		}
 		else{
-			if(this.districtView == null){ this.districtView(this.districts); }
-			else{ this.districtView.update(this.districts); }
+			console.log("handling for district");
+			if(SELF.districtView == null){ SELF.districtView = new DistrictView(SELF.districts); }
+			else{ SELF.districtView.update(SELF.districts); }
 		}
 	}
 
@@ -171,6 +196,7 @@ class DistopiaInterface{
 			});
 			//initateStateView();
 		});
+		console.log(this.counties);
 	}
 
 	toggleView(){
@@ -182,6 +208,7 @@ class DistopiaInterface{
 		else{
 			$("#state-view").hide();
 			$("#district-view").show();
+
 			this.currentView = "state";
 		}
 	}
@@ -203,6 +230,19 @@ class DistopiaInterface{
 		}
 		else { return false; }
 	}
+
+	getView(){
+		return this.currentView;
+	}
+
+	setView(v){
+		this.currentView = v;
+		return this.currentView;
+	}
+	
+	getCounties(){
+		return this.counties;
+	}
 }
 
 export const parseData = (labels, data) => {
@@ -211,10 +251,10 @@ export const parseData = (labels, data) => {
 	return objArray;
 }
 
-var d = new DistopiaInterface();
-d.initDataListener();
-d.initControlListener();
+export var distopia = new DistopiaInterface();
+distopia.initDataListener();
+distopia.initControlListener();
 
 $(".button").click(() =>{
-	d.toggleView();
+	distopia.toggleView();
 });

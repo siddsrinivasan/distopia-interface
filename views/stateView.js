@@ -3,10 +3,12 @@
 	==========
 	A statewide view of a selected metric, with a heatmap and a set of histograms
 */
-import {parseData} from './distopiaInterface.js'
+import {parseData, distopia, MIN_X, MIN_Y, MAX_X, MAX_Y, SCALE} from './distopiaInterface.js'
 import Histogram from "./viz/histogram.js";
 
-class StateView {
+var SELF;
+
+export class StateView {
 	
 	constructor(initData, metricFocus = "demographics"){
 		this.metricFocus = metricFocus;
@@ -15,15 +17,19 @@ class StateView {
 	
 		this.width = parseFloat(d3.select("#state").style("width"));
 		this.height = parseFloat(d3.select("#state").style("height"));
+		SELF = this;
 
-		this.xScale = d3.scaleLinear().domain([minX, maxX]).range([0, this.width]);
-		this.yScale = d3.scaleLinear().domain([minY, maxY]).range([this.height, 0]);
+		this.xScale = d3.scaleLinear().domain([MIN_X, MAX_X]).range([0, this.width]);
+		this.yScale = d3.scaleLinear().domain([MIN_Y, MAX_Y]).range([this.height, 0]);
 
-		this.drawStatePolygons();
+		this.drawn = false;
 
 		this.histograms = [];
-		for(var i = 0; i < 8; i++){
-			this.histograms.push(new Histogram("#" + "dist" + id, initData[i].data, initData[i].labels, styles[this.metricFocus]));
+		if(initData != null){
+			this.drawStatePolygons();
+			for(var i = 0; i < 8; i++){
+				this.histograms.push(new Histogram("#" + "dist" + id, initData[i].data, initData[i].labels, styles[this.metricFocus]));
+			}
 		}
 	}
 	
@@ -33,7 +39,7 @@ class StateView {
 	}
 
 	paintStateViz(){
-		this.stateDiv.data(d.counties);
+		this.stateDiv.data(distopia.counties);
 		this.stateDiv.style("fill", function(county){
 			return county.fill;
 		});
@@ -49,6 +55,15 @@ class StateView {
 		//update the viz. Note that the
 		this.setMetricFocus(metric);
 
+		console.log(data);
+
+		if(this.histograms.length == 0){
+			for(var i = 0; i < 8; i++){
+				SELF.histograms.push(new Histogram("#" + "dist" + id, data[i].data, data[i].labels, styles[SELF.metricFocus]));
+			}
+		}
+		if(!this.drawn){ this.drawStatePolygons(); }
+
 		//pull the metric wanted for each district
 		let districtData = []
 		data.districts.forEach(district => {
@@ -60,90 +75,32 @@ class StateView {
 		});
 
 		//updates fills for each county so that it can use paintStateViz()
-		d.districts.forEach((district,i) => {
+		distopia.districts.forEach((district,i) => {
 			var sum = districtData[id-1].data.reduce((a, b) => a + b, 0);
 			var fVal = districtData[i]/sum;
-			var scale = d.scales.metric;
+			var scale = distopia.scales.metric;
 			district.precincts.forEach(p => {
-				var countyDatum = d.getCounty(p);
+				var countyDatum = distopia.getCounty(p);
 				//countyDatum.fill = scale(fVal); //This will be used once we have scales for every metric
-				d.modifyCounty(p, countyDatum);
+				distopia.modifyCounty(p, countyDatum);
 			});
 		});
 		this.paintStateViz();
 		this.paintHistograms(districtData);	
 	}
 
-	//ABSOLUTELY DO NOT USE THIS EXCEPT TO CHECK IF DATA BINDING IS WORKING
-	//THIS WILL MESS UP ALL REAL DATA
-	randomizeData(){
-		var colors = ["#E6AF82", "#82E0E6", "#A49AC9", "#BDE682", "#E68882", "white", "#C582E6"];
-		//update states graphic
-		d.districts.forEach(district => {
-			var rand = colors[Math.floor(Math.random() * colors.length)];
-			district.metrics.forEach(metric => {
-				var dat = [];
-				for(var i = 0; i < 6; i++){
-					dat.push(Math.floor(Math.random() * 50) + 1);
-				}
-				metric.data = dat;
-			});
-
-			district.precincts.forEach(function(p){
-				var countyDatum = d.getCounty(p);
-				countyDatum.fill = rand;
-				d.modifyCounty(p, countyDatum);
-			});
-		});
-
-		//updates histograms, ripped from paintHistograms()
-		for(var id = 1; id <= 8; id++){
-			if(id == 1){ console.log(parseData(metricData[id-1].labels, metricData[id-1].data));}
-	
-			var width = parseFloat(d3.select("#" + "dist" + id).style("width"));
-			var height = parseFloat(d3.select("#" + "dist" + id).style("height"));
-	
-			var yScale = d3.scaleLinear().domain([0, 1]).range([height + state_padding, state_padding]);
-			var xBin = (width - 2 * state_padding)/7.0;
-	
-			var sum = metricData[id-1].data.slice(3,10).reduce((a, b) => a + b, 0);
-			
-			var rect = d3.select("#" + "dist" + id)
-				.selectAll("rect").data(parseData(metricData[id-1].labels, metricData[id-1].data))
-				.attr("x", function(d, i){ return state_padding + xBin * i; })
-				.attr("y", function(d){ return yScale(d.amount/sum); })
-				.attr("width", xBin)
-				.attr("height", function(d){ return height + state_padding - yScale(d.amount/sum); })
-				.attr("class", function(d){ return d.name; });
-	
-			rect.enter().append("rect")
-				.attr("x", function(d, i){ return state_padding + xBin * i; })
-				.attr("y", function(d){ return yScale(d.amount/sum); })
-				.attr("width", xBin)
-				.attr("height", function(d){ return height + state_padding - yScale(d.amount/sum); })
-				.attr("fill", function(d,i){ return colors[i]})
-				.attr("class", function(d){ return d.name; });
-			
-			rect.exit().remove();
-		}
-
-		this.paintStateViz();
-		this.paintHistograms(districtData);
-	}
-
 	drawStatePolygons(){
 		//TODO: change how referencing counties
-		this.stateDiv.data(d.counties).enter().append("polygon")
+		this.stateDiv.data(distopia.getCounties()).enter().append("polygon")
 			.attr("points", function(county){
 				return county.boundaries.map(function(point){
-					return [this.xScale(point[0]), this.yScale(point[1])].join(",");
+					return [SELF.xScale(point[0]), SELF.yScale(point[1])].join(",");
 				}).join(" ");
 			})
 			.style("fill", function(county){ 
 				if(county.fill == null) return "white";
 				else return county.fill;
 			});
+		this.drawn = true;
 	}
 }
-
-export default StateView;
