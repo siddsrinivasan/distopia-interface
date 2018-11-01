@@ -3,7 +3,7 @@
 	==========
 	A statewide view of a selected metric, with a heatmap and a set of histograms
 */
-import {parseData, MIN_X, MIN_Y, MAX_X, MAX_Y, METRICS, METRIC_TYPE, STYLES, SCALE} from './distopiaInterface.js'
+import {parseData, METRICS, METRIC_TYPE, STYLES, SCALE} from './distopiaInterface.js'
 import Histogram from "./viz/histogram.js";
 
 var SELF;
@@ -20,8 +20,13 @@ export class StateView {
 		this.height = parseFloat(d3.select("#state").style("height"));
 		SELF = this;
 
-		this.xScale = d3.scaleLinear().domain([MIN_X, MAX_X]).range([0, this.width]);
-		this.yScale = d3.scaleLinear().domain([MIN_Y, MAX_Y]).range([this.height, 0]);
+		this.xScale = null;
+		this.yScale = null;
+
+		this.MIN_X = null;
+		this.MIN_Y = null;
+		this.MAX_X = null;
+		this.MAX_Y = null;
 
 		this.drawn = false;
 
@@ -38,11 +43,20 @@ export class StateView {
 	filterByFocusMetric(data){
 		let districtData = []
 		data.forEach(district => {
-			district.metrics.forEach(m =>{
+			let d = {
+				precincts: district.precincts,
+				name: null,
+				labels: null,
+				data: null
+			}
+			district.metrics.forEach(m => {
 				if(m.name == this.metricFocus){
-					districtData.push(m);
+					d.name = m.name;
+					d.labels = m.labels;
+					d.data = m.data;
 				}
 			});
+			districtData.push(d);
 		});
 		return districtData;
 	}
@@ -56,9 +70,19 @@ export class StateView {
 		return this.metricFocus;
 	}
 
+	setBounds(MIN_X, MIN_Y, MAX_X, MAX_Y){
+		this.MIN_X = MIN_X;
+		this.MIN_Y = MIN_Y;
+		this.MAX_X = MAX_X;
+		this.MAX_Y = MAX_Y;
+
+		this.xScale = d3.scaleLinear().domain([MIN_X, MAX_X]).range([20, this.width - 20]);
+		this.yScale = d3.scaleLinear().domain([MIN_Y, MAX_Y]).range([this.height - 20, 20]);
+	}
+
 	paintStateViz(countyData){
-		this.stateDiv.data(countyData);
-		this.stateDiv.style("fill", function(county){
+		this.stateDiv.data(countyData).style("fill", function(county){
+			console.log(county.fill);
 			return county.fill;
 		});
 	}
@@ -70,6 +94,7 @@ export class StateView {
 	}
 
 	update(data,metric){
+		console.log("updating");
 		//update the viz. Note that the
 		if(metric != undefined){
 			this.setMetricFocus(metric);
@@ -78,10 +103,11 @@ export class StateView {
 		if(data.length < 8){
 			return;
 		}
+		
 		//pull the metric wanted for each district
-
-		let filledCounties = [];		
+		let filledCounties = [];
 		const districtData = this.filterByFocusMetric(data);
+		console.log(districtData);
 		if(this.histograms.length == 0){
 			for(var i = 0; i < 8; i++){
 				this.histograms.push(new Histogram("#" + "dist" + (i+1), districtData[i].data, districtData[i].labels, STYLES[this.metricFocus]));
@@ -90,7 +116,8 @@ export class StateView {
 		if(!this.drawn){ this.drawStatePolygons(); }
 
 		districtData.forEach((district) => {
-			let f = SCALE[this.metricFocus](district.data);
+			let scale = SCALE[this.metricFocus];
+			let f = scale(district.data);
 			district.precincts.forEach((precinct) => {
 				filledCounties.push({...this.counties[precinct], fill: f});
 			});
@@ -101,17 +128,25 @@ export class StateView {
 	}
 
 	drawStatePolygons(){
-		//TODO: change how referencing counties
-		this.stateDiv.data(this.counties).enter().append("polygon")
-			.attr("points", function(county){
-				return county.boundaries.map(function(point){
-					return [SELF.xScale(point[0]), SELF.yScale(point[1])].join(",");
-				}).join(" ");
-			})
-			.style("fill", function(county){ 
-				if(county.fill == null) return "white";
-				else return county.fill;
-			});
-		this.drawn = true;
+		if(this.xScale != null){
+			console.log("drawing poly");
+			//TODO: change how referencing counties
+			this.stateDiv.data(this.counties).enter().append("polygon")
+				.attr("points", function(county){
+					return county.boundaries.map(function(point){
+						let x = SELF.xScale; let y = SELF.yScale;
+						return [x(point[0]), y(point[1])].join(",");
+					}).join(" ");
+				})
+				.style("fill", function(county){
+					console.log(county.fill);
+					if(county.fill == undefined) return "white";
+					else return county.fill;
+				});
+			this.drawn = true;
+		}
+		else{
+			return;
+		}
 	}
 }

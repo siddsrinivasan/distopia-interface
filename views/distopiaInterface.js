@@ -7,13 +7,18 @@
 import {DistrictView} from "./districtView.js";
 import {StateView} from "./stateView.js";
 
-export var MIN_X, MIN_Y, MAX_X, MAX_Y;
+var MIN_X, MIN_Y, MAX_X, MAX_Y;
 
 //These are global color scales for different metrics
 //To invoke, scales.[NAME OF SCALE](VALUE) ex: scales.partisanFill(0.5)
 export var SCALE = {
-	partisanFill : d3.scaleLinear().domain([-1, 0, 1]).range(["#D0021B", "white", "#4A90E2"]),
-	incomeFill : d3.scaleLinear().domain([0, 100]).range(["white", "green"])
+	"population": function([pop_total, pop_voting]){
+		var scale = d3.scaleLinear().domain([0,1]).range(["white", "#4A90E2"]);
+		console.log(pop_voting/pop_total);
+		return scale(pop_voting/pop_total);
+	},
+	"projected_votes" : d3.scaleLinear().domain([-1, 0, 1]).range(["#D0021B", "white", "#4A90E2"]),
+	"income" : d3.scaleLinear().domain([0, 100]).range(["white", "green"])
 }
 
 //export const METRICS = ["income","age","sex","race","education","occupation","population","projected_votes","pvi","wasted_votes","compactness"]
@@ -82,7 +87,8 @@ export class DistopiaInterface{
 
 	initRosBridge(){
 		this.ros = new ROSLIB.Ros({
-			url: 'ws://daarm.ngrok.io'
+			//url: 'ws://daarm.ngrok.io'
+			url: 'ws://localhost:9090'
 		});
 		
 		this.ros.on('connection', function(){
@@ -141,7 +147,6 @@ export class DistopiaInterface{
 		SELF.districts = messageData.districts;
 		if(SELF.getView() == "state"){
 			console.log("handling for state");
-			console.log(SELF.stateView);
 			if(SELF.stateView == null){ SELF.stateView = new StateView(SELF.districts); }
 			else{ SELF.stateView.update(SELF.districts); }
 		}
@@ -182,7 +187,6 @@ export class DistopiaInterface{
 					boundaries: null,
 					x: [null, null],
 					y: [null, null],
-					fill: null
 				});
 			});
 		});
@@ -222,9 +226,9 @@ export class DistopiaInterface{
 					return countyPoint[1];
 				});
 			});
+			self.stateView.setBounds(MIN_X, MIN_Y, MAX_X, MAX_Y);
 			//initateStateView();
 		});
-		console.log(this.counties);
 	}
 
 	toggleView(){
