@@ -17,6 +17,9 @@ class Histogram{
 	}
 
 	render(data, labels, styles){
+		d3.select(".xAxis").remove();
+		d3.select(".yAxix").remove();
+
 		const colors = styles.colors;
 		const width = parseFloat(d3.select(this.selector).style("width"));
 		const height = parseFloat(d3.select(this.selector).style("height"));
@@ -35,10 +38,10 @@ class Histogram{
 		const sum = data.reduce((a, b) => a + b, 0);
 
 		//adds axis to the histogram
-		d3.select(this.selector).append("g").call(xAxis)
-			.attr("transform", "translate(" + [padding, height - padding]+ ")");
-		d3.select(this.selector).append("g").call(yAxis)
-			.attr("transform", "translate(" + [padding, padding]+ ")");
+		d3.select(this.selector).append("g").attr("xAxis").call(xAxis)
+			.attr("transform", "translate(" + [padding, height - padding] + ")");
+		d3.select(this.selector).append("g").attr("yAxis").call(yAxis)
+			.attr("transform", "translate(" + [padding, padding] + ")");
 
 		//enters data
 		let rect = d3.select(this.selector)
