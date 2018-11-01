@@ -3,14 +3,15 @@
 	==========
 	A statewide view of a selected metric, with a heatmap and a set of histograms
 */
-import {parseData, distopia, MIN_X, MIN_Y, MAX_X, MAX_Y, METRICS, METRIC_TYPE, STYLES, SCALE} from './distopiaInterface.js'
+import {parseData, MIN_X, MIN_Y, MAX_X, MAX_Y, METRICS, METRIC_TYPE, STYLES, SCALE} from './distopiaInterface.js'
 import Histogram from "./viz/histogram.js";
 
 var SELF;
 
 export class StateView {
 	
-	constructor(initData, metricFocus = "population"){
+	constructor(initData, metricFocus = "population", counties){
+		this.counties = counties;
 		this.metricFocus = metricFocus;
 		console.log("Initiating State View");
 		this.stateDiv = d3.select("#state").selectAll("polygon");
@@ -35,13 +36,6 @@ export class StateView {
 	}
 
 	filterByFocusMetric(data){
-		// return data.map(district => {
-		// 	const metricIndex = district.metrics.find((metric)=>metric.name==this.metricFocus);
-		// 	if(metricIndex < 0){
-		// 		throw("metric focus not in data!");
-		// 	}
-		// 	return district.metrics[metricIndex];
-		// })
 		let districtData = []
 		data.forEach(district => {
 			district.metrics.forEach(m =>{
@@ -62,8 +56,8 @@ export class StateView {
 		return this.metricFocus;
 	}
 
-	paintStateViz(){
-		this.stateDiv.data(distopia.counties);
+	paintStateViz(countyData){
+		this.stateDiv.data(countyData);
 		this.stateDiv.style("fill", function(county){
 			return county.fill;
 		});
@@ -86,7 +80,7 @@ export class StateView {
 		}
 		//pull the metric wanted for each district
 
-		
+		let filledCounties = [];		
 		const districtData = this.filterByFocusMetric(data);
 		if(this.histograms.length == 0){
 			for(var i = 0; i < 8; i++){
@@ -95,26 +89,20 @@ export class StateView {
 		}
 		if(!this.drawn){ this.drawStatePolygons(); }
 
-		
-
-		//updates fills for each county so that it can use paintStateViz()
-		distopia.districts.forEach((district,i) => {
-			var sum = districtData[i].data.reduce((a, b) => a + b, 0);
-			var fVal = districtData[i]/sum;
-			//var scale = distopia.scales.metric;
-			district.precincts.forEach(p => {
-				var countyDatum = distopia.getCounty(p);
-				//countyDatum.fill = scale(fVal); //This will be used once we have scales for every metric
-				distopia.modifyCounty(p, countyDatum);
+		districtData.forEach((district) => {
+			let f = SCALE[this.metricFocus](district.data);
+			district.precincts.forEach((precinct) => {
+				filledCounties.push({...this.counties[precinct], fill: f});
 			});
 		});
-		this.paintStateViz();
+
+		this.paintStateViz(filledCounties);
 		this.paintHistograms(districtData);	
 	}
 
 	drawStatePolygons(){
 		//TODO: change how referencing counties
-		this.stateDiv.data(distopia.getCounties()).enter().append("polygon")
+		this.stateDiv.data(this.counties).enter().append("polygon")
 			.attr("points", function(county){
 				return county.boundaries.map(function(point){
 					return [SELF.xScale(point[0]), SELF.yScale(point[1])].join(",");

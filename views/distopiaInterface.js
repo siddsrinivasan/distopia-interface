@@ -31,7 +31,7 @@ export const STYLES = {
 			american_indian: "#ac235",
 			pacific_islander: "#ccccc",
 			other: "#00000",
-			two_or_more: "#4444"
+			two_or_more: "#44444"
 		}
 	},
 	population: {
@@ -64,7 +64,7 @@ export class DistopiaInterface{
 
 		//initializes stateView and districtView classes as null variables
 		//(easy way to check if they need to be initialized)
-		this.stateView = new StateView(null,"population");
+		this.stateView = new StateView(null, "population", this.counties);
 		//this.districtView = new DistrictView(null);
 
 		this.currentView = initialView;
