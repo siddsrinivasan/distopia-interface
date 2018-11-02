@@ -14,7 +14,7 @@ export class StateView {
 		this.counties = counties;
 		this.metricFocus = metricFocus;
 		console.log("Initiating State View");
-		this.stateDiv = d3.select("#state").selectAll("polygon");
+		this.stateDiv = d3.select("#state");
 	
 		this.width = parseFloat(d3.select("#state").style("width"));
 		this.height = parseFloat(d3.select("#state").style("height"));
@@ -28,11 +28,13 @@ export class StateView {
 		this.MAX_X = null;
 		this.MAX_Y = null;
 
+		console.log(this.counties);
+
 		this.drawn = false;
+		this.drawStatePolygons();
 
 		this.histograms = [];
 		if(initData != null){
-			this.drawStatePolygons();
 			const focusedData = this.filterByFocusMetric(initData);
 			for(var i = 0; i < 8; i++){
 				this.histograms.push(new Histogram("#" + "dist" + (i+1), focusedData[i].data, focusedData[i].labels, styles[this.metricFocus]));
@@ -76,12 +78,15 @@ export class StateView {
 		this.MAX_X = MAX_X;
 		this.MAX_Y = MAX_Y;
 
+		console.log(MIN_X);
+
 		this.xScale = d3.scaleLinear().domain([MIN_X, MAX_X]).range([20, this.width - 20]);
 		this.yScale = d3.scaleLinear().domain([MIN_Y, MAX_Y]).range([this.height - 20, 20]);
 	}
 
 	paintStateViz(countyData){
-		this.stateDiv.data(countyData).style("fill", function(county){
+		let state = this.stateDiv.selectAll("polygon").data(countyData);
+		state.attr("fill", function(county){
 			console.log(county.fill);
 			return county.fill;
 		});
@@ -99,7 +104,6 @@ export class StateView {
 		if(metric != undefined){
 			this.setMetricFocus(metric);
 		}
-		console.log(data);
 		if(data.length < 8){
 			return;
 		}
@@ -107,7 +111,6 @@ export class StateView {
 		//pull the metric wanted for each district
 		let filledCounties = [];
 		const districtData = this.filterByFocusMetric(data);
-		console.log(districtData);
 		if(this.histograms.length == 0){
 			for(var i = 0; i < 8; i++){
 				this.histograms.push(new Histogram("#" + "dist" + (i+1), districtData[i].data, districtData[i].labels, STYLES[this.metricFocus]));
@@ -119,10 +122,18 @@ export class StateView {
 			let scale = SCALE[this.metricFocus];
 			let f = scale(district.data);
 			district.precincts.forEach((precinct) => {
-				filledCounties.push({...this.counties[precinct], fill: f});
+				let theCount;
+				this.counties.forEach((c) => {
+					if(c.id == precinct){
+						console.log(c); console.log(precinct);
+						theCount = c;
+						filledCounties.push({...theCount, fill: f});
+					}
+				});
 			});
 		});
 
+		console.log(filledCounties);
 		this.paintStateViz(filledCounties);
 		this.paintHistograms(districtData);	
 	}
@@ -131,17 +142,14 @@ export class StateView {
 		if(this.xScale != null){
 			console.log("drawing poly");
 			//TODO: change how referencing counties
-			this.stateDiv.data(this.counties).enter().append("polygon")
+			this.stateDiv.selectAll("polygon").data(this.counties).enter().append("polygon")
 				.attr("points", function(county){
 					return county.boundaries.map(function(point){
-						let x = SELF.xScale; let y = SELF.yScale;
-						return [x(point[0]), y(point[1])].join(",");
+						return [SELF.xScale(point[0]), SELF.yScale(point[1])].join(",");
 					}).join(" ");
 				})
-				.style("fill", function(county){
-					console.log(county.fill);
-					if(county.fill == undefined) return "white";
-					else return county.fill;
+				.attr("fill", function(county){
+					return county.fill;
 				});
 			this.drawn = true;
 		}

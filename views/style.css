@@ -153,9 +153,8 @@
 	transition-delay: 0s;
 }
 polygon{
-	stroke-width:1px;
-	stroke:black;
-	fill: white;
+	stroke-width:2px;
+	stroke:white;
 }
 body{
 	overflow-x: hidden;

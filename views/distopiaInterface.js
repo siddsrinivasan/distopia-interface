@@ -13,9 +13,8 @@ var MIN_X, MIN_Y, MAX_X, MAX_Y;
 //To invoke, scales.[NAME OF SCALE](VALUE) ex: scales.partisanFill(0.5)
 export var SCALE = {
 	"population": function([pop_total, pop_voting]){
-		var scale = d3.scaleLinear().domain([0,1]).range(["white", "#4A90E2"]);
-		console.log(pop_voting/pop_total);
-		return scale(pop_voting/pop_total);
+		var scale = d3.scaleLinear().domain([0,1000000]).range(["white", "#4A90E2"]);
+		return scale(pop_total);
 	},
 	"projected_votes" : d3.scaleLinear().domain([-1, 0, 1]).range(["#D0021B", "white", "#4A90E2"]),
 	"income" : d3.scaleLinear().domain([0, 100]).range(["white", "green"])
@@ -139,7 +138,6 @@ export class DistopiaInterface{
 	handleData(message){
 		//check the counter
 		const messageData = JSON.parse(message.data);
-		console.log(messageData);
 		if(messageData.counter <= SELF.counter){
 			return;
 		}
@@ -187,6 +185,7 @@ export class DistopiaInterface{
 					boundaries: null,
 					x: [null, null],
 					y: [null, null],
+					fill: "white"
 				});
 			});
 		});
