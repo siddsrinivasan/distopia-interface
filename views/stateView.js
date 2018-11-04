@@ -78,8 +78,6 @@ export class StateView {
 		this.MAX_X = MAX_X;
 		this.MAX_Y = MAX_Y;
 
-		console.log(MIN_X);
-
 		this.xScale = d3.scaleLinear().domain([MIN_X, MAX_X]).range([20, this.width - 20]);
 		this.yScale = d3.scaleLinear().domain([MIN_Y, MAX_Y]).range([this.height - 20, 20]);
 	}
@@ -99,7 +97,6 @@ export class StateView {
 	}
 
 	update(data,metric){
-		console.log("updating");
 		//update the viz. Note that the
 		if(metric != undefined){
 			this.setMetricFocus(metric);
@@ -118,22 +115,18 @@ export class StateView {
 		}
 		if(!this.drawn){ this.drawStatePolygons(); }
 
-		districtData.forEach((district) => {
+		districtData.forEach((district, ind) => {
 			let scale = SCALE[this.metricFocus];
 			let f = scale(district.data);
+			console.log(district.data);
+			console.log(f);
+			console.log(district.precincts);
 			district.precincts.forEach((precinct) => {
-				let theCount;
-				this.counties.forEach((c) => {
-					if(c.id == precinct){
-						console.log(c); console.log(precinct);
-						theCount = c;
-						filledCounties.push({...theCount, fill: f});
-					}
-				});
+				console.log(precinct);
+				filledCounties.push({...this.counties[precinct], fill: f, dist: ind});
 			});
 		});
 
-		console.log(filledCounties);
 		this.paintStateViz(filledCounties);
 		this.paintHistograms(districtData);	
 	}
@@ -143,10 +136,16 @@ export class StateView {
 			console.log("drawing poly");
 			//TODO: change how referencing counties
 			this.stateDiv.selectAll("polygon").data(this.counties).enter().append("polygon")
-				.attr("points", function(county){
+				.attr("points", function(county, i){
+					d3.select("#state").append("text")
+						.attr("text-anchor", "middle").attr("alignment-baseline", "middle")
+						.attr("x", SELF.xScale((county.x[1] - county.x[0])/2 + county.x[0]))
+						.attr("y", SELF.yScale((county.y[1] - county.y[0])/2 + county.y[0]))
+						.text(i);
 					return county.boundaries.map(function(point){
 						return [SELF.xScale(point[0]), SELF.yScale(point[1])].join(",");
 					}).join(" ");
+					//append number in center of county					
 				})
 				.attr("fill", function(county){
 					return county.fill;

@@ -13,7 +13,8 @@ var MIN_X, MIN_Y, MAX_X, MAX_Y;
 //To invoke, scales.[NAME OF SCALE](VALUE) ex: scales.partisanFill(0.5)
 export var SCALE = {
 	"population": function([pop_total, pop_voting]){
-		var scale = d3.scaleLinear().domain([0,1000000]).range(["white", "#4A90E2"]);
+		var scale = d3.scaleLinear().domain([0,3000000]).range(["white", "#4A90E2"]);
+		console.log(pop_total/3000000);
 		return scale(pop_total);
 	},
 	"projected_votes" : d3.scaleLinear().domain([-1, 0, 1]).range(["#D0021B", "white", "#4A90E2"]),
@@ -144,12 +145,10 @@ export class DistopiaInterface{
 		SELF.counter = messageData.counter;
 		SELF.districts = messageData.districts;
 		if(SELF.getView() == "state"){
-			console.log("handling for state");
 			if(SELF.stateView == null){ SELF.stateView = new StateView(SELF.districts); }
 			else{ SELF.stateView.update(SELF.districts); }
 		}
 		else{
-			console.log("handling for district");
 			if(SELF.districtView == null){ SELF.districtView = new DistrictView(SELF.districts); }
 			else{ SELF.districtView.update(SELF.districts); }
 		}
