@@ -82,10 +82,9 @@ export class StateView {
 		this.yScale = d3.scaleLinear().domain([MIN_Y, MAX_Y]).range([this.height - 20, 20]);
 	}
 
-	paintStateViz(countyData){
-		let state = this.stateDiv.selectAll("polygon").data(countyData);
+	paintStateViz(){
+		let state = this.stateDiv.selectAll("polygon").data(this.counties);
 		state.attr("fill", function(county){
-			console.log(county.fill);
 			return county.fill;
 		});
 	}
@@ -118,30 +117,24 @@ export class StateView {
 		districtData.forEach((district, ind) => {
 			let scale = SCALE[this.metricFocus];
 			let f = scale(district.data);
-			console.log(district.data);
-			console.log(f);
-			console.log(district.precincts);
 			district.precincts.forEach((precinct) => {
-				console.log(precinct);
-				filledCounties.push({...this.counties[precinct], fill: f, dist: ind});
+				this.counties[precinct].fill = f;
 			});
 		});
 
-		this.paintStateViz(filledCounties);
+		this.paintStateViz();
 		this.paintHistograms(districtData);	
 	}
 
 	drawStatePolygons(){
 		if(this.xScale != null){
-			console.log("drawing poly");
-			//TODO: change how referencing counties
 			this.stateDiv.selectAll("polygon").data(this.counties).enter().append("polygon")
 				.attr("points", function(county, i){
-					d3.select("#state").append("text")
-						.attr("text-anchor", "middle").attr("alignment-baseline", "middle")
-						.attr("x", SELF.xScale((county.x[1] - county.x[0])/2 + county.x[0]))
-						.attr("y", SELF.yScale((county.y[1] - county.y[0])/2 + county.y[0]))
-						.text(i);
+					//d3.select("#state").append("text")
+					//	.attr("text-anchor", "middle").attr("alignment-baseline", "middle")
+					//	.attr("x", SELF.xScale((county.x[1] - county.x[0])/2 + county.x[0]))
+					//	.attr("y", SELF.yScale((county.y[1] - county.y[0])/2 + county.y[0]))
+					//	.text(i);
 					return county.boundaries.map(function(point){
 						return [SELF.xScale(point[0]), SELF.yScale(point[1])].join(",");
 					}).join(" ");
