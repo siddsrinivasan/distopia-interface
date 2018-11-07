@@ -12,18 +12,43 @@ var MIN_X, MIN_Y, MAX_X, MAX_Y;
 //These are global color scales for different metrics
 //To invoke, scales.[NAME OF SCALE](VALUE) ex: scales.partisanFill(0.5)
 export var SCALE = {
-	"population": function([pop_total, pop_voting]){
-		var scale = d3.scaleLinear().domain([0,3000000]).range(["white", "#4A90E2"]);
-		console.log(pop_total/3000000);
-		return scale(pop_total);
+	//every scale, get scaleMax, scaleMin, scaleVale
+	"age": function(){
+		
 	},
-	"projected_votes" : d3.scaleLinear().domain([-1, 0, 1]).range(["#D0021B", "white", "#4A90E2"]),
-	"income" : d3.scaleLinear().domain([0, 100]).range(["white", "green"])
+	"education": function([num_college, total_pop]){
+		//percentage with bachelor's degree or higher
+		let scale = d3.scaleLinear().domain([0, 1]).range(["white", "purple"]);
+		return scale(num_college/total_pop);
+	},
+	"income": function([]){
+		let scale = d3.scaleLinear().domain([0, 100]).range(["white", "green"]);
+	},
+	"occupation": function([num_employed, total_pop]){
+		//percentage employed out of total population
+		let scale = d3.scaleLinear().domain([0,1]).range(["white", "purple"]);
+		return scale([num_employed/total_pop]);
+	},
+	"population": function([pop_voting, total_pop]){
+		//voting population out of 3 million (or max which will be defined later)
+		let scale = d3.scaleLinear().domain([0,3000000]).range(["white", "#4A90E2"]);
+		return scale(pop_voting);
+	},
+	"projected_votes": function([num_democrat, total_votes]){
+		//lean to either republican or democrat
+		let scale = d3.scaleLinear().domain([-1, 0, 1]).range(["#D0021B", "white", "#4A90E2"]);
+		let prop_democrat = num_democrat/total_votes;
+		let prop_republican = 1 - prop_democrat;
+		return scale(prop_democrat - prop_republican);
+	},
+	"race": function([num_minorities, total_pop]){
+		//number nonwhite divided by total population
+		let scale = d3.scaleLinear().domain([0,1]).range(["white", "green"]);
+		return scale(num_minorities/total_pop);
+	}
 }
 
-//export const METRICS = ["income","age","sex","race","education","occupation","population","projected_votes","pvi","wasted_votes","compactness"]
 export const METRICS = ["age","education","income","occupation","population","projected_votes","race","sex"]
-//export const METRIC_TYPE = ["histogram","histogram","histogram","histogram","histogram","histogram","scalar","histogram","scalar","histogram","scalar"]
 export const METRIC_TYPE = ["histogram","histogram","histogram","histogram","histogram","histogram","histogram","histogram"]
 export const STYLES = {
 
@@ -39,10 +64,10 @@ export const STYLES = {
 			two_or_more: "#44444"
 		}
 	},
-	population: {
+	"population": {
 		colors:{
-			total: "#FFFFF",
-			voting: "#AAAAA"
+			"total": "#FFFFF",
+			"voting": "#AAAAA"
 		}
 	}
 }

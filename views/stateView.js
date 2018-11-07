@@ -65,7 +65,6 @@ export class StateView {
 	
 	setMetricFocus(metric){
 		this.metricFocus = metric;
-		//this.paintHistograms();
 	}
 
 	getMetricFocus(){
@@ -98,14 +97,14 @@ export class StateView {
 	update(data,metric){
 		//update the viz. Note that the
 		if(metric != undefined){
-			this.setMetricFocus(metric);
+			if(metric != this.metric){
+				this.setMetricFocus(metric);
+			}
 		}
-		if(data.length < 8){
-			return;
-		}
+		else{ return; }
+		if(data.length < 8){ return; }
 		
 		//pull the metric wanted for each district
-		let filledCounties = [];
 		const districtData = this.filterByFocusMetric(data);
 		if(this.histograms.length == 0){
 			for(var i = 0; i < 8; i++){
@@ -114,9 +113,12 @@ export class StateView {
 		}
 		if(!this.drawn){ this.drawStatePolygons(); }
 
-		districtData.forEach((district, ind) => {
+		districtData.forEach((district) => {
 			let scale = SCALE[this.metricFocus];
-			let f = scale(district.data);
+			//scalar_max 	=	total population in most cases
+			//scalar_value	=	
+			//label
+			let f = scale([district.scalar_maximum, district.scalar_label, district.scalar_value]);
 			district.precincts.forEach((precinct) => {
 				this.counties[precinct].fill = f;
 			});
@@ -129,24 +131,16 @@ export class StateView {
 	drawStatePolygons(){
 		if(this.xScale != null){
 			this.stateDiv.selectAll("polygon").data(this.counties).enter().append("polygon")
-				.attr("points", function(county, i){
-					//d3.select("#state").append("text")
-					//	.attr("text-anchor", "middle").attr("alignment-baseline", "middle")
-					//	.attr("x", SELF.xScale((county.x[1] - county.x[0])/2 + county.x[0]))
-					//	.attr("y", SELF.yScale((county.y[1] - county.y[0])/2 + county.y[0]))
-					//	.text(i);
+				.attr("points", function(county){
 					return county.boundaries.map(function(point){
 						return [SELF.xScale(point[0]), SELF.yScale(point[1])].join(",");
 					}).join(" ");
-					//append number in center of county					
 				})
 				.attr("fill", function(county){
 					return county.fill;
 				});
 			this.drawn = true;
 		}
-		else{
-			return;
-		}
+		else{ return; }
 	}
 }
