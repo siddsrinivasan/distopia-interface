@@ -14,6 +14,7 @@ var MIN_X, MIN_Y, MAX_X, MAX_Y;
 export var SCALE = {
 	//every scale, get scaleMax, scaleMin, scaleVale
 	"age": function([median_age,total_pop]){
+		console.log(median_age);
 		let scale = d3.scaleLinear().domain([0,100]).range(["white","#C93FFF"]);
 		return scale(median_age);
 	},
@@ -23,13 +24,14 @@ export var SCALE = {
 		return scale(num_college/total_pop);
 	},
 	"income": function([median_income, tot_pop]){
-		let scale = d3.scaleLinear().domain([0, 80000]).range(["white", "green"]);
+		console.log(median_income);
+		let scale = d3.scaleLinear().domain([35000, 70000]).range(["white", "green"]);
 		return scale(median_income);
 	},
 	"occupation": function([num_employed, total_pop]){
 		//percentage employed out of total population
-		let scale = d3.scaleLinear().domain([0,1]).range(["white", "pink"]);
-		return scale([num_employed/total_pop]);
+		let scale = d3.scaleLinear().domain([0.45,0.55]).range(["white", "pink"]);
+		return scale(num_employed/total_pop);
 	},
 	"population": function([pop_voting, total_pop]){
 		//voting population out of 3 million (or max which will be defined later)
@@ -41,6 +43,7 @@ export var SCALE = {
 		let scale = d3.scaleLinear().domain([-1, 0, 1]).range(["#D0021B", "white", "#4A90E2"]);
 		let prop_democrat = num_democrat/total_votes;
 		let prop_republican = 1 - prop_democrat;
+		console.log(prop_democrat, prop_republican);
 		return scale(prop_democrat - prop_republican);
 	},
 	"race": function([num_minorities, total_pop]){
@@ -154,7 +157,7 @@ export class DistopiaInterface{
 		this.counter = messageData.counter;
 		this.districts = messageData.districts;
 		if(this.getView() == "state"){
-			console.log("handling for state");
+			//console.log("handling for state");
 			this.stateView.update(this.districts);
 		}
 		else{
@@ -166,10 +169,10 @@ export class DistopiaInterface{
 	handleData(message){
 		//check the counter
 		const messageData = JSON.parse(message.data);
-		if(messageData.counter <= SELF.counter){
+		if(messageData.count <= SELF.counter){
 			return;
 		}
-		SELF.counter = messageData.counter;
+		SELF.counter = messageData.count;
 		SELF.districts = messageData.districts;
 		if(SELF.getView() == "state"){
 			if(SELF.stateView == null){ SELF.stateView = new StateView(SELF.districts); }
@@ -182,7 +185,7 @@ export class DistopiaInterface{
 	}
 
 	handleCommand(message){
-		console.log("Got Command:",message);
+		//console.log("Got Command:",message);
 		const messageData = JSON.parse(message.data);
 		if(messageData.cmd == "focus_state"){
 			if(SELF.stateView.getMetricFocus() != messageData.param){

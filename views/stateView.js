@@ -28,16 +28,18 @@ export class StateView {
 		this.MAX_X = null;
 		this.MAX_Y = null;
 
-		console.log(this.counties);
-
 		this.drawn = false;
 		this.drawStatePolygons();
+
+		let max = 1;
+		if(this.metricFocus == "population"){ max = 3000000; }
+		console.log(max);
 
 		this.histograms = [];
 		if(initData != null){
 			const focusedData = this.filterByFocusMetric(initData);
 			for(var i = 0; i < 8; i++){
-				this.histograms.push(new Histogram("#" + "dist" + (i+1), focusedData[i].data, focusedData[i].labels, styles[this.metricFocus]));
+				this.histograms.push(new Histogram("#" + "dist" + (i+1), focusedData[i].data, focusedData[i].labels, styles[this.metricFocus],max));
 			}
 		}
 	}
@@ -49,13 +51,17 @@ export class StateView {
 				precincts: district.precincts,
 				name: null,
 				labels: null,
-				data: null
+				data: null,
+				scalar_value: null,
+				scalar_maximum: null
 			}
 			district.metrics.forEach(m => {
 				if(m.name == this.metricFocus){
 					d.name = m.name;
 					d.labels = m.labels;
 					d.data = m.data;
+					d.scalar_value = m.scalar_value;
+					d.scalar_maximum = m.scalar_maximum;
 				}
 			});
 			districtData.push(d);
@@ -89,8 +95,10 @@ export class StateView {
 	}
 
 	paintHistograms(data){
+		let max = 1;
+		if(this.metricFocus == "population"){ max = 3000000; }
 		for(var i = 0; i < this.histograms.length; i++){
-			this.histograms[i].update(data[i].data, data[i].labels, STYLES[this.metricFocus]);
+			this.histograms[i].update(data[i].data, data[i].labels, STYLES[this.metricFocus], max);
 		}
 	}
 
@@ -101,23 +109,25 @@ export class StateView {
 				this.setMetricFocus(metric);
 			}
 		}
-		else{ return; }
+		console.log(this.metricFocus);
 		if(data.length < 8){ return; }
 		
 		//pull the metric wanted for each district
+		let max = 1;
+		if(this.metricFocus == "population"){ max = 3000000; }
+		console.log(max);
 		const districtData = this.filterByFocusMetric(data);
 		if(this.histograms.length == 0){
 			for(var i = 0; i < 8; i++){
-				this.histograms.push(new Histogram("#" + "dist" + (i+1), districtData[i].data, districtData[i].labels, STYLES[this.metricFocus]));
+				this.histograms.push(new Histogram("#" + "dist" + (i+1), districtData[i].data, districtData[i].labels, STYLES[this.metricFocus], max));
 			}
 		}
 		if(!this.drawn){ this.drawStatePolygons(); }
 
+		console.log(districtData);
+
 		districtData.forEach((district) => {
 			let scale = SCALE[this.metricFocus];
-			//scalar_max 	=	total population in most cases
-			//scalar_value	=	
-			//label
 			let f = scale([district.scalar_value, district.scalar_maximum]);
 			district.precincts.forEach((precinct) => {
 				this.counties[precinct].fill = f;
