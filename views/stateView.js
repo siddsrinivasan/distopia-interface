@@ -118,7 +118,7 @@ export class StateView {
 			//scalar_max 	=	total population in most cases
 			//scalar_value	=	
 			//label
-			let f = scale([district.scalar_maximum, district.scalar_label, district.scalar_value]);
+			let f = scale([district.scalar_value, district.scalar_maximum]);
 			district.precincts.forEach((precinct) => {
 				this.counties[precinct].fill = f;
 			});

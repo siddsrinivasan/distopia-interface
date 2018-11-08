@@ -13,25 +13,27 @@ var MIN_X, MIN_Y, MAX_X, MAX_Y;
 //To invoke, scales.[NAME OF SCALE](VALUE) ex: scales.partisanFill(0.5)
 export var SCALE = {
 	//every scale, get scaleMax, scaleMin, scaleVale
-	"age": function(){
-		
+	"age": function([median_age,total_pop]){
+		let scale = d3.scaleLinear().domain([0,100]).range(["white","#C93FFF"]);
+		return scale(median_age);
 	},
 	"education": function([num_college, total_pop]){
 		//percentage with bachelor's degree or higher
 		let scale = d3.scaleLinear().domain([0, 1]).range(["white", "purple"]);
 		return scale(num_college/total_pop);
 	},
-	"income": function([]){
-		let scale = d3.scaleLinear().domain([0, 100]).range(["white", "green"]);
+	"income": function([median_income, tot_pop]){
+		let scale = d3.scaleLinear().domain([0, 80000]).range(["white", "green"]);
+		return scale(median_income);
 	},
 	"occupation": function([num_employed, total_pop]){
 		//percentage employed out of total population
-		let scale = d3.scaleLinear().domain([0,1]).range(["white", "purple"]);
+		let scale = d3.scaleLinear().domain([0,1]).range(["white", "pink"]);
 		return scale([num_employed/total_pop]);
 	},
 	"population": function([pop_voting, total_pop]){
 		//voting population out of 3 million (or max which will be defined later)
-		let scale = d3.scaleLinear().domain([0,3000000]).range(["white", "#4A90E2"]);
+		let scale = d3.scaleLinear().domain([0,3000000]).range(["white", "orange"]);
 		return scale(pop_voting);
 	},
 	"projected_votes": function([num_democrat, total_votes]){
@@ -43,7 +45,7 @@ export var SCALE = {
 	},
 	"race": function([num_minorities, total_pop]){
 		//number nonwhite divided by total population
-		let scale = d3.scaleLinear().domain([0,1]).range(["white", "green"]);
+		let scale = d3.scaleLinear().domain([0,1]).range(["white", "#102C42"]);
 		return scale(num_minorities/total_pop);
 	}
 }
@@ -52,20 +54,20 @@ export const METRICS = ["age","education","income","occupation","population","pr
 export const METRIC_TYPE = ["histogram","histogram","histogram","histogram","histogram","histogram","histogram","histogram"]
 export const STYLES = {
 
-	race: {
-		colors:{
-			white: "#FFFFF",
-			black: "#AAAAA",
-			hispanic: "#14325",
-			asian: "#74654",
-			american_indian: "#ac235",
-			pacific_islander: "#ccccc",
-			other: "#00000",
-			two_or_more: "#44444"
+	"race": {
+		"colors":{
+			"white": "#FFFFF",
+			"black": "#AAAAA",
+			"hispanic": "#14325",
+			"asian": "#74654",
+			"american_indian": "#ac235",
+			"pacific_islander": "#ccccc",
+			"other": "#00000",
+			"two_or_more": "#44444"
 		}
 	},
 	"population": {
-		colors:{
+		"colors":{
 			"total": "#FFFFF",
 			"voting": "#AAAAA"
 		}
