@@ -12,7 +12,7 @@ const padding = {
 	left: 50,
 	right: 15,
 	top: 20,
-	bottom: 20
+	bottom: 25
 };
 
 class Histogram{
@@ -26,9 +26,8 @@ class Histogram{
 		d3.select(this.selector).selectAll(".yAxis").remove();
 		d3.select(this.selector).selectAll("rect").remove();
 
-		console.log(data);
-
-		//const colors = styles.colors;
+		let colors = null;
+		if(styles.colors != null){ colors = styles.colors; }
 		const width = parseFloat(d3.select(this.selector).style("width"));
 		const height = parseFloat(d3.select(this.selector).style("height"));
 
@@ -57,48 +56,33 @@ class Histogram{
 			.selectAll("rect").data(parseData(labels, data))
 			.attr("x", function(d){ return xScale(d.name); })
 			.attr("y", function(d){
-				if(max != 1){
-					return yScale(d.amount);
-				}
-				else{
-					return yScale(d.amount/sum);
-				}
+				if(max != 1){ return yScale(d.amount); }
+				else{ return yScale(d.amount/sum); }
 			})
 			.attr("width", xScale.bandwidth())
 			.attr("height", function(d){
-				if(max != 1){
-					return yScale(0) - yScale(d.amount);
-				}
-				else{
-					return yScale(0) - yScale(d.amount/sum);
-				}})
-			//.attr("fill", function(d,i){
-			//	console.log(d);
-			//	console.log(colors[labels[i]]);
-			//	return colors[labels[i]]
-			//});
+				if(max != 1){ return yScale(0) - yScale(d.amount); }
+				else{ return yScale(0) - yScale(d.amount/sum); }
+			})
+			.attr("fill", function(d,i){
+				if(colors != null){ return colors[labels[i]]; }
+			});
 
 		//updates data
 		rect.enter().append("rect")
 			.attr("x", function(d){ return xScale(d.name); })
 			.attr("y", function(d){
-				if(max != 1){
-					return yScale(d.amount);
-				}
-				else{
-					return yScale(d.amount/sum);
-				}
+				if(max != 1){ return yScale(d.amount); }
+				else{ return yScale(d.amount/sum); }
 			})
 			.attr("width", xScale.bandwidth())
 			.attr("height", function(d){ 
-				if(max != 1){
-					return yScale(0) - yScale(d.amount);
-				}
-				else{
-					return yScale(0) - yScale(d.amount/sum);
-				}
+				if(max != 1){ return yScale(0) - yScale(d.amount); }
+				else{ return yScale(0) - yScale(d.amount/sum); }
 			})
-			//.attr("fill", function(d,i){ return colors[labels[i]]});
+			.attr("fill", function(d,i){
+				if(colors != null){ return colors[labels[i]]; }
+			});
 		
 		//removes data
 		rect.exit().remove();

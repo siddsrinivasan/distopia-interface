@@ -14,8 +14,7 @@ var MIN_X, MIN_Y, MAX_X, MAX_Y;
 export var SCALE = {
 	//every scale, get scaleMax, scaleMin, scaleVale
 	"age": function([median_age,total_pop]){
-		console.log(median_age);
-		let scale = d3.scaleLinear().domain([0,100]).range(["white","#C93FFF"]);
+		let scale = d3.scaleLinear().domain([35,55]).range(["white","#C93FFF"]);
 		return scale(median_age);
 	},
 	"education": function([num_college, total_pop]){
@@ -24,7 +23,6 @@ export var SCALE = {
 		return scale(num_college/total_pop);
 	},
 	"income": function([median_income, tot_pop]){
-		console.log(median_income);
 		let scale = d3.scaleLinear().domain([35000, 70000]).range(["white", "green"]);
 		return scale(median_income);
 	},
@@ -43,7 +41,6 @@ export var SCALE = {
 		let scale = d3.scaleLinear().domain([-1, 0, 1]).range(["#D0021B", "white", "#4A90E2"]);
 		let prop_democrat = num_democrat/total_votes;
 		let prop_republican = 1 - prop_democrat;
-		console.log(prop_democrat, prop_republican);
 		return scale(prop_democrat - prop_republican);
 	},
 	"race": function([num_minorities, total_pop]){
@@ -53,26 +50,84 @@ export var SCALE = {
 	}
 }
 
+export var DOMAIN = {
+	"age": {
+		domain: [35,55],
+		label: "years old"
+	},
+	"education": {
+		domain: [0, 1],
+		label: "Bachelor's degree"
+	},
+	"income": {
+		domain: [35000, 70000],
+		label: "annual income"
+	},
+	"occupation": {
+		domain: [0.45,0.55],
+		label: "employed"
+	},
+	"population": {
+		domain: [0,3000000],
+		label: "voters"
+	},
+	"projected_votes": {
+		domain: [0, 1],
+		label: "Democrat"
+	},
+	"race":{
+		domain: [0,1],
+		label: "Non-white"
+	}
+}
+
 export const METRICS = ["age","education","income","occupation","population","projected_votes","race","sex"]
 export const METRIC_TYPE = ["histogram","histogram","histogram","histogram","histogram","histogram","histogram","histogram"]
 export const STYLES = {
 
 	"race": {
-		"colors":{
-			"white": "#FFFFF",
-			"black": "#AAAAA",
-			"hispanic": "#14325",
-			"asian": "#74654",
-			"american_indian": "#ac235",
-			"pacific_islander": "#ccccc",
-			"other": "#00000",
-			"two_or_more": "#44444"
+		colors:{
+			"white": "#E6AF81",
+			"black": "#E68882",
+			"hispanic": "#8A82E5",
+			"asian": "#BDE682",
+			"american_indian": "#82E0E6",
+			"pacific_islander": "#CCCCCC",
+			"other": "#000000",
+			"two_or_more": "#444444"
 		}
 	},
 	"population": {
-		"colors":{
-			"total": "#FFFFF",
-			"voting": "#AAAAA"
+		colors:{
+			"total": "#CCCCCC",
+			"voting": "#82E0E6"
+		}
+	},
+	"age":{
+		colors: null
+	},
+	"education":{
+		colors:{
+			"High school": "#CCCCCC",
+			"Bachelors": "#82E0E6"
+		}
+	},
+	"projected_votes":{
+		colors:{
+			"democrat": "#4A90E2",
+			"republican": "#D0021B"
+		}
+	},
+	"income":{
+		colors: null
+	},
+	"occupation":{
+		colors:{
+			"Manufacturing": "#E6AF81",
+			"Retail": "#E68882",
+			"Pro": "#8A82E5",
+			"Public": "#BDE682",
+			"Service": "#82E0E6",
 		}
 	}
 }

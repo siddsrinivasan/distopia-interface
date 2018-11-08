@@ -3,7 +3,7 @@
 	==========
 	A statewide view of a selected metric, with a heatmap and a set of histograms
 */
-import {parseData, METRICS, METRIC_TYPE, STYLES, SCALE} from './distopiaInterface.js'
+import {parseData, METRICS, METRIC_TYPE, STYLES, SCALE, DOMAIN} from './distopiaInterface.js'
 import Histogram from "./viz/histogram.js";
 
 var SELF;
@@ -33,12 +33,12 @@ export class StateView {
 
 		let max = 1;
 		if(this.metricFocus == "population"){ max = 3000000; }
-		console.log(max);
 
 		this.histograms = [];
 		if(initData != null){
 			const focusedData = this.filterByFocusMetric(initData);
 			for(var i = 0; i < 8; i++){
+				d3.select("#" + "dist" + (i+1)).append("text").attr("x", 10).attr("y", 10).text(i);
 				this.histograms.push(new Histogram("#" + "dist" + (i+1), focusedData[i].data, focusedData[i].labels, styles[this.metricFocus],max));
 			}
 		}
@@ -103,36 +103,66 @@ export class StateView {
 	}
 
 	update(data,metric){
+		d3.selectAll(".dist_label").remove();
+		d3.selectAll(".label").remove();
+		d3.selectAll(".key").remove();
 		//update the viz. Note that the
 		if(metric != undefined){
 			if(metric != this.metric){
 				this.setMetricFocus(metric);
 			}
 		}
-		console.log(this.metricFocus);
 		if(data.length < 8){ return; }
 		
 		//pull the metric wanted for each district
 		let max = 1;
 		if(this.metricFocus == "population"){ max = 3000000; }
-		console.log(max);
 		const districtData = this.filterByFocusMetric(data);
 		if(this.histograms.length == 0){
 			for(var i = 0; i < 8; i++){
+				d3.select("#" + "dist" + (i+1)).append("text").attr("x", 10).attr("y", 15).text(i);
 				this.histograms.push(new Histogram("#" + "dist" + (i+1), districtData[i].data, districtData[i].labels, STYLES[this.metricFocus], max));
 			}
 		}
 		if(!this.drawn){ this.drawStatePolygons(); }
+		d3.select("#scale").append("text").attr("x", 10).attr("y", 20).text(this.metricFocus).attr("class", "label");
 
-		console.log(districtData);
-
-		districtData.forEach((district) => {
+		districtData.forEach((district, i) => {
+			let distX_min = 1000000, distX_max = 0, distY_min = 1000000, distY_max = 0;
 			let scale = SCALE[this.metricFocus];
 			let f = scale([district.scalar_value, district.scalar_maximum]);
 			district.precincts.forEach((precinct) => {
 				this.counties[precinct].fill = f;
+				if(distX_min > this.counties[precinct].x[0]){ distX_min = this.counties[precinct].x[0]; }
+				if(distX_max < this.counties[precinct].x[1]){ distX_max = this.counties[precinct].x[1]; }
+				if(distY_min > this.counties[precinct].y[0]){ distY_min = this.counties[precinct].y[0]; }
+				if(distY_max < this.counties[precinct].y[1]){ distY_max = this.counties[precinct].y[1]; }
 			});
+			this.stateDiv.append("text").attr("class", "dist_label")
+				.attr("x", this.xScale(distX_min + (distX_max-distX_min)/2))
+				.attr("y", this.yScale(distY_min + (distY_max-distY_min)/2))
+				.text(i);
 		});
+
+		let key = d3.select("#scale").append("g").attr("class", "key");
+		
+		let key_height = parseFloat(d3.select("#scale").style("height"));
+		let key_width = parseFloat(d3.select("#scale").style("width"));
+
+		let scale = SCALE[this.metricFocus];
+		let domain = DOMAIN[this.metricFocus].domain;
+		let step = (domain[domain.length-1] - domain[0])/5;
+		console.log(scale);
+		console.log(domain);
+		for(var i = 0; i <= 5; i++){
+			console.log(domain[0] + i * step, domain[domain.length-1]);
+			key.append("rect").attr("height", key_height - 40).attr("width", key_height - 40)
+				.attr("x", i * key_height).attr("y", 20).attr("fill", scale([domain[0] + i * step, domain[domain.length-1]]));
+		}
+		key.append("text").attr("x", 0).attr("y", key_height - 8).text(domain[0] + " " + DOMAIN[this.metricFocus].label);
+		key.append("text").attr("x", 5 * (key_height)).attr("y", key_height - 8).text(domain[domain.length-1] + " " + DOMAIN[this.metricFocus].label);
+
+		key.attr("transform", "translate(120,0)")
 
 		this.paintStateViz();
 		this.paintHistograms(districtData);	

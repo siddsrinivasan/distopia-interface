@@ -164,9 +164,8 @@ body{
 }
 
 .left {
-	height: 85%;
+	height: 75%;
 	width: 44%;
-	/*background-color: white;*/
 	float: left;
 	display: flex;
 	align-items: center;
@@ -178,6 +177,15 @@ body{
 	height: 100%;
 	width: 100%;
 	margin: 1% 1% 1% 1% ;
+	background-color: white;
+	box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+}
+
+.left #scale{
+	height: 100%;
+	width: 100%;
+	margin: 1% 1% 1% 1% ;
+	background-color: white;
 	box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
 }
 
