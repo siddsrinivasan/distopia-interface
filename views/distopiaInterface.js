@@ -38,7 +38,7 @@ export var SCALE = {
 	},
 	"projected_votes": function([num_democrat, total_votes]){
 		//lean to either republican or democrat
-		let scale = d3.scaleLinear().domain([-1, 0, 1]).range(["#D0021B", "white", "#4A90E2"]);
+		let scale = d3.scaleLinear().domain([-1, 0, 1]).range(["#D0021B","white", "#4A90E2"]);
 		let prop_democrat = num_democrat/total_votes;
 		let prop_republican = 1 - prop_democrat;
 		return scale(prop_democrat - prop_republican);
@@ -229,6 +229,7 @@ export class DistopiaInterface{
 		}
 		SELF.counter = messageData.count;
 		SELF.districts = messageData.districts;
+		console.log(messageData);
 		if(SELF.getView() == "state"){
 			if(SELF.stateView == null){ SELF.stateView = new StateView(SELF.districts); }
 			else{ SELF.stateView.update(SELF.districts); }

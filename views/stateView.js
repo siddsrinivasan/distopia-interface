@@ -125,7 +125,21 @@ export class StateView {
 			}
 		}
 		if(!this.drawn){ this.drawStatePolygons(); }
-		d3.select("#scale").append("text").attr("x", 10).attr("y", 20).text(this.metricFocus).attr("class", "label");
+
+		let labelText = "";
+		if(this.metricFocus == "age"){ labelText = "Median Age per District"; }
+		else if(this.metricFocus == "education"){ labelText = "% of Population with a Bachelor's Degree per District"; }
+		else if(this.metricFocus == "income"){ labelText = "Median Income per District"; }
+		else if(this.metricFocus == "occupation"){ labelText = "% Employed per District"; }
+		else if(this.metricFocus == "population"){ labelText = "Population per District"; }
+		else if(this.metricFocus == "projected_votes"){ labelText = "Partisan Lean per District"; }
+		else if(this.metricFocus == "race"){ labelText = "% Minority population per District"; }
+
+		d3.select("#label_area").append("text").text(labelText).attr("class", "label")
+			.attr("x", parseFloat(d3.select("#label_area").style("width"))/2)
+			.attr("y", parseFloat(d3.select("#label_area").style("height"))/2)
+			.style("text-anchor", "middle").style("alignment-baseline", "middle")
+			.style("font-size", "2em");
 
 		districtData.forEach((district, i) => {
 			let distX_min = 1000000, distX_max = 0, distY_min = 1000000, distY_max = 0;
@@ -152,10 +166,7 @@ export class StateView {
 		let scale = SCALE[this.metricFocus];
 		let domain = DOMAIN[this.metricFocus].domain;
 		let step = (domain[domain.length-1] - domain[0])/5;
-		console.log(scale);
-		console.log(domain);
 		for(var i = 0; i <= 5; i++){
-			console.log(domain[0] + i * step, domain[domain.length-1]);
 			key.append("rect").attr("height", key_height - 40).attr("width", key_height - 40)
 				.attr("x", i * key_height).attr("y", 20).attr("fill", scale([domain[0] + i * step, domain[domain.length-1]]));
 		}
