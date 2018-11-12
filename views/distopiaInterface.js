@@ -57,7 +57,7 @@ export var DOMAIN = {
 	},
 	"education": {
 		domain: [0, 1],
-		label: "Bachelor's degree"
+		label: "College Educated"
 	},
 	"income": {
 		domain: [35000, 70000],
@@ -84,23 +84,22 @@ export var DOMAIN = {
 export const METRICS = ["age","education","income","occupation","population","projected_votes","race","sex"]
 export const METRIC_TYPE = ["histogram","histogram","histogram","histogram","histogram","histogram","histogram","histogram"]
 export const STYLES = {
-
 	"race": {
 		colors:{
 			"white": "#E6AF81",
-			"black": "#E68882",
-			"hispanic": "#8A82E5",
-			"asian": "#BDE682",
-			"american_indian": "#82E0E6",
+			"Black": "#E68882",
+			"Hispanic": "#8A82E5",
+			"Asian": "#BDE682",
+			"Native American": "#82E0E6",
 			"pacific_islander": "#CCCCCC",
-			"other": "#000000",
-			"two_or_more": "#444444"
+			"Other": "#000000",
+			"Two or More": "#444444"
 		}
 	},
 	"population": {
 		colors:{
-			"total": "#CCCCCC",
-			"voting": "#82E0E6"
+			"Total Population": "#CCCCCC",
+			"Voting Population": "#82E0E6"
 		}
 	},
 	"age":{
@@ -108,14 +107,14 @@ export const STYLES = {
 	},
 	"education":{
 		colors:{
-			"High school": "#CCCCCC",
-			"Bachelors": "#82E0E6"
+			"High School/GED": "#CCCCCC",
+			"Bachelor's": "#82E0E6"
 		}
 	},
 	"projected_votes":{
 		colors:{
-			"democrat": "#4A90E2",
-			"republican": "#D0021B"
+			"Democrat": "#4A90E2",
+			"Republican": "#D0021B"
 		}
 	},
 	"income":{
@@ -125,7 +124,7 @@ export const STYLES = {
 		colors:{
 			"Manufacturing": "#E6AF81",
 			"Retail": "#E68882",
-			"Pro": "#8A82E5",
+			"Professional": "#8A82E5",
 			"Public": "#BDE682",
 			"Service": "#82E0E6",
 		}

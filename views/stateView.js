@@ -38,7 +38,7 @@ export class StateView {
 		if(initData != null){
 			const focusedData = this.filterByFocusMetric(initData);
 			for(var i = 0; i < 8; i++){
-				d3.select("#" + "dist" + (i+1)).append("text").attr("x", 10).attr("y", 10).text(i);
+				d3.select("#" + "dist" + (i+1)).append("text").attr("x", 10).attr("y", 10).text("District " + i);
 				this.histograms.push(new Histogram("#" + "dist" + (i+1), focusedData[i].data, focusedData[i].labels, styles[this.metricFocus],max));
 			}
 		}
@@ -83,7 +83,12 @@ export class StateView {
 		this.MAX_X = MAX_X;
 		this.MAX_Y = MAX_Y;
 
-		this.xScale = d3.scaleLinear().domain([MIN_X, MAX_X]).range([20, this.width - 20]);
+		var scale = this.height/(this.MAX_Y - this.MIN_Y - 40);
+
+		var xExtents = (this.MAX_X - this.MIN_X) * scale;
+		var padding = (this.width - xExtents)/2;
+
+		this.xScale = d3.scaleLinear().domain([MIN_X, MAX_X]).range([padding, xExtents + padding]);
 		this.yScale = d3.scaleLinear().domain([MIN_Y, MAX_Y]).range([this.height - 20, 20]);
 	}
 
@@ -103,6 +108,7 @@ export class StateView {
 	}
 
 	update(data,metric){
+		console.log("updating");
 		d3.selectAll(".dist_label").remove();
 		d3.selectAll(".label").remove();
 		d3.selectAll(".key").remove();
@@ -120,7 +126,7 @@ export class StateView {
 		const districtData = this.filterByFocusMetric(data);
 		if(this.histograms.length == 0){
 			for(var i = 0; i < 8; i++){
-				d3.select("#" + "dist" + (i+1)).append("text").attr("x", 10).attr("y", 15).text(i);
+				d3.select("#" + "dist" + (i+1)).append("text").attr("x", 10).attr("y", 15).text("District " + i);
 				this.histograms.push(new Histogram("#" + "dist" + (i+1), districtData[i].data, districtData[i].labels, STYLES[this.metricFocus], max));
 			}
 		}
@@ -162,18 +168,49 @@ export class StateView {
 		
 		let key_height = parseFloat(d3.select("#scale").style("height"));
 		let key_width = parseFloat(d3.select("#scale").style("width"));
-
+	
 		let scale = SCALE[this.metricFocus];
 		let domain = DOMAIN[this.metricFocus].domain;
 		let step = (domain[domain.length-1] - domain[0])/5;
+
+		key.append("rect").attr("width", 6 * (key_height - 40)).attr("height", key_height - 40)
+			.attr("x", 0).attr("y", 10)
+			.attr("fill", "none").attr("stroke", "black").attr("stroke-width", 2);	
+		
+		if(domain[1] <= 1){
+			key.append("text").attr("x", (key_height - 40)/2).attr("y", key_height - 16)
+				.text(parseInt(domain[0] * 100) + "% " + DOMAIN[this.metricFocus].label)
+				.attr("text-anchor", "middle").attr("alignment-baseline", "middle");
+			key.append("text").attr("x", 5.5 * (key_height - 40)).attr("y", key_height - 16)
+				.text(parseInt(domain[domain.length-1] * 100) + "% " + DOMAIN[this.metricFocus].label)
+				.attr("text-anchor", "middle").attr("alignment-baseline", "middle");
+		}
+		else if (domain[1] == 70000){
+			key.append("text").attr("x", (key_height - 40)/2).attr("y", key_height - 16)
+				.text("$" + parseInt(domain[0]) + " " + DOMAIN[this.metricFocus].label)
+				.attr("text-anchor", "middle").attr("alignment-baseline", "middle");
+			key.append("text").attr("x", 5.5 * (key_height - 40)).attr("y", key_height - 16)
+				.text("$" + parseInt(domain[domain.length-1]) + " " + DOMAIN[this.metricFocus].label)
+				.attr("text-anchor", "middle").attr("alignment-baseline", "middle");
+		}
+		else{
+			key.append("text").attr("x", (key_height - 40)/2).attr("y", key_height - 16)
+				.text(parseInt(domain[0]) + " " + DOMAIN[this.metricFocus].label)
+				.attr("text-anchor", "middle").attr("alignment-baseline", "middle");
+			key.append("text").attr("x", 5.5 * (key_height - 40)).attr("y", key_height - 16)
+				.text(parseInt(domain[domain.length-1]) + " " + DOMAIN[this.metricFocus].label)
+				.attr("text-anchor", "middle").attr("alignment-baseline", "middle");
+		}
+		
 		for(var i = 0; i <= 5; i++){
 			key.append("rect").attr("height", key_height - 40).attr("width", key_height - 40)
-				.attr("x", i * key_height).attr("y", 20).attr("fill", scale([domain[0] + i * step, domain[domain.length-1]]));
+				.attr("x", i * (key_height - 40)).attr("y", 10).attr("fill", () => {
+					if(domain[1] == 0.55){ return scale([domain[0] + i * step, 1]) }
+					else { return scale([domain[0] + i * step, domain[domain.length-1]]) }
+				});
 		}
-		key.append("text").attr("x", 0).attr("y", key_height - 8).text(domain[0] + " " + DOMAIN[this.metricFocus].label);
-		key.append("text").attr("x", 5 * (key_height)).attr("y", key_height - 8).text(domain[domain.length-1] + " " + DOMAIN[this.metricFocus].label);
 
-		key.attr("transform", "translate(120,0)")
+		key.attr("transform", "translate(" + (key_width - (6 * (key_height - 40)))/2 + ",0)")
 
 		this.paintStateViz();
 		this.paintHistograms(districtData);	
