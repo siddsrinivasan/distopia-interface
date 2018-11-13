@@ -103,7 +103,17 @@ export const STYLES = {
 		}
 	},
 	"age":{
-		colors: null
+		colors: {
+			"0 to 10":"#447C1C",
+			"10 to 20":"#588B20",
+			"20 to 30":"#6E9A25",
+			"30 to 40":"#87A82A",
+			"40 to 50":"#A1B62F",
+			"50 to 60":"#BDC434",
+			"60 to 70":"#D2CA39",
+			"70 to 80":"#E0C63E",
+			"80+":"#EDC044",
+		}
 	},
 	"education":{
 		colors:{
@@ -118,7 +128,13 @@ export const STYLES = {
 		}
 	},
 	"income":{
-		colors: null
+		colors: {
+			"$0 to $25k": "#D7F6FF",
+			"$25k to $50k": "#B1D4FF",
+			"$50k to $75k" :"#8C9EFF",
+			"$75k to $100k" :"#7E6AFF",
+			"$100k +" :"#9449FF"
+		}
 	},
 	"occupation":{
 		colors:{

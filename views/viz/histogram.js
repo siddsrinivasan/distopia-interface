@@ -29,26 +29,24 @@ class Histogram{
 		let white = 0;
 		//SPECIAL CASE FOR RACE BREAKDOWN DATA
 		if(labels[0] == "white"){
-			console.log(labels);
-			console.log(data);
 			max = 0.25;
+			let arr = data.slice(0);
 			let otherInd, pacInd;
 			labels.forEach((label, index) => {
 				if(label == "white"){
 					white = data[index];
-					data.splice(index, 1);
+					arr.splice(index, 1);
 				}
 				else if(label == "pacific_Islander"){ pacInd = index; }
 				else if(label == "other"){ otherInd = index; }
 			});
-			console.log("pacific islander: " + data[pacInd]);
 			if(pacInd != undefined){
-				data[otherInd] += pacInd;
-				data.splice(pacInd, 1);
+				arr[otherInd] += pacInd;
+				arr.splice(pacInd, 1);
 			}
 			
 			labels = ["Black", "Hispanic", "Native American", "Asian", "Other", "Two or More"];
-			console.log(data);
+			data = arr;
 		}
 
 		//SPECIAL CASE FOR INCOME BREAKDOWN DATA

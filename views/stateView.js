@@ -101,6 +101,7 @@ export class StateView {
 
 	paintHistograms(data){
 		let max = 1;
+		console.log(this.metricFocus);
 		if(this.metricFocus == "population"){ max = 3000000; }
 		for(var i = 0; i < this.histograms.length; i++){
 			this.histograms[i].update(data[i].data, data[i].labels, STYLES[this.metricFocus], max);
@@ -132,18 +133,45 @@ export class StateView {
 		}
 		if(!this.drawn){ this.drawStatePolygons(); }
 
-		let labelText = "";
-		if(this.metricFocus == "age"){ labelText = "Median Age per District"; }
-		else if(this.metricFocus == "education"){ labelText = "% of Population with a Bachelor's Degree per District"; }
-		else if(this.metricFocus == "income"){ labelText = "Median Income per District"; }
-		else if(this.metricFocus == "occupation"){ labelText = "% Employed per District"; }
-		else if(this.metricFocus == "population"){ labelText = "Population per District"; }
-		else if(this.metricFocus == "projected_votes"){ labelText = "Partisan Lean per District"; }
-		else if(this.metricFocus == "race"){ labelText = "% Minority population per District"; }
+		let labelText = "", histLabel = "";
+		if(this.metricFocus == "age"){
+			labelText = "Median Age per District";
+			histLabel = "Age Distribution per District";
+		}
+		else if(this.metricFocus == "education"){
+			labelText = "% of Population with a Bachelor's Degree per District";
+			histLabel = "Educational Attainment per District";
+		}
+		else if(this.metricFocus == "income"){
+			labelText = "Median Income per District";
+			histLabel = "Income Distribution per District";
+		}
+		else if(this.metricFocus == "occupation"){
+			labelText = "% Employed per District";
+			histLabel = "Occupation Sector Distribution per District";
+		}
+		else if(this.metricFocus == "population"){
+			labelText = "Population per District";
+			histLabel = "Total Population vs. Voting Population";
+		}
+		else if(this.metricFocus == "projected_votes"){
+			labelText = "Partisan Lean per District";
+			histLabel = "Partisan Breakdown per District";
+		}
+		else if(this.metricFocus == "race"){
+			labelText = "% Minority population per District";
+			histLabel = "Non-White Racial Distribution per District";
+		}
 
 		d3.select("#label_area").append("text").text(labelText).attr("class", "label")
 			.attr("x", parseFloat(d3.select("#label_area").style("width"))/2)
 			.attr("y", parseFloat(d3.select("#label_area").style("height"))/2)
+			.style("text-anchor", "middle").style("alignment-baseline", "middle")
+			.style("font-size", "2em");
+
+		d3.select("#hist_label").append("text").text(histLabel).attr("class", "label")
+			.attr("x", parseFloat(d3.select("#hist_label").style("width"))/2)
+			.attr("y", parseFloat(d3.select("#hist_label").style("height"))/2)
 			.style("text-anchor", "middle").style("alignment-baseline", "middle")
 			.style("font-size", "2em");
 
