@@ -121,6 +121,14 @@ export class StateView {
 		}
 		if(data.length < 8){ return; }
 		
+		let bounds = [];
+
+		data.forEach((district) => {
+			bounds.push(district.boundary);
+		});
+
+		this.drawDistrictBounds(bounds);
+
 		//pull the metric wanted for each district
 		let max = 1;
 		if(this.metricFocus == "population"){ max = 3000000; }
@@ -258,5 +266,29 @@ export class StateView {
 			this.drawn = true;
 		}
 		else{ return; }
+	}
+
+	drawDistrictBounds(boundaries) {
+		var correctBounds = [];
+		var lineGenerator = d3.line();
+
+		d3.selectAll(".bounds").remove();
+		boundaries.forEach((bounds) => {
+			var b = [];
+			bounds.forEach((pt, i) => {
+				if(i%2 == 0){
+					let p = [];
+					p.push(this.xScale(pt));
+					b.push(p);
+				}
+				else { b[b.length - 1].push(this.yScale(pt)); }
+			});
+			correctBounds.push(b);
+		});
+
+		correctBounds.forEach((bounds) => {
+			this.stateDiv.append("path").attr("class", "bounds")
+				.attr("d", lineGenerator(bounds)).attr("fill", "transparent").attr("stroke", "white").attr("stroke-width", "1px");
+		});
 	}
 }
