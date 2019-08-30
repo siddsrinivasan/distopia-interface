@@ -38,15 +38,26 @@ export var SCALE = {
 	},
 	"projected_votes": function([num_democrat, total_votes]){
 		//lean to either republican or democrat
-		let scale = d3.scaleLinear().domain([-1, 0, 1]).range(["#D0021B","white", "#4A90E2"]);
+		// let scale = d3.scaleLinear().domain([-1, 0, 1]).range(["#D0021B","white", "#4A90E2"]);
+		// let prop_democrat = num_democrat/total_votes;
+		// let prop_republican = 1 - prop_democrat;
+		// return scale(prop_democrat - prop_republican);
+		let scale = d3.scaleLinear().domain([0, 0.5, 1]).range(["#D0021B","white", "#4A90E2"]);
 		let prop_democrat = num_democrat/total_votes;
-		let prop_republican = 1 - prop_democrat;
-		return scale(prop_democrat - prop_republican);
+		return scale(prop_democrat);
 	},
 	"race": function([num_minorities, total_pop]){
 		//number nonwhite divided by total population
 		let scale = d3.scaleLinear().domain([0,1]).range(["white", "#102C42"]);
 		return scale(num_minorities/total_pop);
+	},
+	"pvi": function([wasted_votes,_]){
+		let scale = d3.scaleLinear().domain([0,200000]).range(["white","red"]);
+		return scale(wasted_votes)
+	},
+	"compactness": function([compactness,_]){
+		let scale = d3.scaleLinear().domain([0,1]).range(["white","green"]);
+		return scale(compactness)
 	}
 }
 
@@ -78,6 +89,14 @@ export var DOMAIN = {
 	"race":{
 		domain: [0,1],
 		label: "Non-white"
+	},
+	"pvi":{
+		domain: [0,200000],
+		label: "Wasted Votes"
+	},
+	"compactness": {
+		domain: [0,1],
+		label: "Compactness"
 	}
 }
 

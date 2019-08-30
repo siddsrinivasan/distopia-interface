@@ -197,7 +197,7 @@ export class StateView {
 			this.stateDiv.append("text").attr("class", "dist_label")
 				.attr("x", this.xScale(distX_min + (distX_max-distX_min)/2))
 				.attr("y", this.yScale(distY_min + (distY_max-distY_min)/2))
-				.text(i);
+				.text(i+1);
 		});
 
 		let key = d3.select("#scale").append("g").attr("class", "key");
