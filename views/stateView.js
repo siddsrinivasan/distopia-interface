@@ -170,6 +170,14 @@ export class StateView {
 			labelText = "% Minority population per District";
 			histLabel = "Non-White Racial Distribution per District";
 		}
+		else if(this.metricFocus == "pvi"){
+			labelText = "# Wasted Votes";
+			histLabel = "This Plot is Under Construction";
+		}
+		else if(this.metricFocus == "compactness"){
+			labelText = "How Regular Shapes Are";
+			histLabel = "This Plot is Under Construction";
+		}
 
 		d3.select("#label_area").append("text").text(labelText).attr("class", "label")
 			.attr("x", parseFloat(d3.select("#label_area").style("width"))/2)
