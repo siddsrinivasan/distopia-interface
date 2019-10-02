@@ -179,6 +179,7 @@ export class DistopiaInterface{
 		this.counter = 0;
 		this.districts = [];
 		this.counties = [];
+		// NOTE - Depending on a flag we should init the Ros Bridge
 		this.initRosBridge();
 		this.initDataListener();
 		this.initControlListener();
@@ -204,6 +205,7 @@ export class DistopiaInterface{
 		}
 	}
 
+	// NOTE shouldn't init RosBridge when we are running web only
 	initRosBridge(){
 		this.ros = new ROSLIB.Ros({
 			//url: 'ws://daarm.ngrok.io'
@@ -223,6 +225,7 @@ export class DistopiaInterface{
 		});
 	}
 
+	// Need to add a flag here that sets the data listener up differently if we aren't using ROSS
 	initDataListener(){
 		this.dataListener = new ROSLIB.Topic({
 			ros: this.ros,
@@ -255,6 +258,7 @@ export class DistopiaInterface{
 		}
 	}
 
+	// NOTE - this method should stay unchanged when we pass in the data from the Flask app
 	handleData(message){
 		//check the counter
 		const messageData = JSON.parse(message.data);
